@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Clock, X, Database, Wifi, WifiOff } from 'lucide-react';
+import { Trash2, Clock, X } from 'lucide-react';
 import type { HistoryItem } from '@/types';
 import { getHistory, clearHistory } from '@/lib/history';
 
@@ -15,34 +15,12 @@ interface HistoryPaneProps {
 }
 
 export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps) {
-  const [localHistory, setLocalHistory] = useState<HistoryItem[]>([]);
-  const [supabaseHistory, setSupabaseHistory] = useState<SearchRecord[]>([]);
-  const [useSupabase, setUseSupabase] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  const loadHistory = useCallback(async () => {
-    setIsLoading(true);
-    
-    // Always load local history as fallback
-    const local = getHistory();
-    setLocalHistory(local);
-    
-    // Try to load from Supabase
-    if (useSupabase && isSupabaseAvailable()) {
-      try {
-        const supabaseData = await getRecentSearches(20);
-        setSupabaseHistory(supabaseData);
-      } catch (error) {
-        console.error('Failed to load Supabase history:', error);
-        setUseSupabase(false); // Fall back to local storage
-      }
-    } else if (useSupabase && !isSupabaseAvailable()) {
-      // Supabase not configured, fall back to local
-      setUseSupabase(false);
-    }
-    
-    setIsLoading(false);
-  }, [useSupabase]);
+  const loadHistory = useCallback(() => {
+    const historyData = getHistory();
+    setHistory(historyData);
+  }, []);
 
   useEffect(() => {
     loadHistory();
@@ -55,36 +33,10 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
     }
   }, [isOpen, loadHistory]);
 
-  const handleClearHistory = async () => {
-    if (useSupabase) {
-      // For Supabase, we can't delete all records (would need auth)
-      // So just clear local history and switch to local mode
-      clearHistory();
-      setLocalHistory([]);
-      setUseSupabase(false);
-    } else {
-      clearHistory();
-      setLocalHistory([]);
-    }
+  const handleClearHistory = () => {
+    clearHistory();
+    setHistory([]);
   };
-
-  const toggleDataSource = () => {
-    setUseSupabase(!useSupabase);
-  };
-
-  // Convert Supabase records to HistoryItem format
-  const convertSupabaseToHistory = (records: SearchRecord[]): HistoryItem[] => {
-    return records.map(record => ({
-      q: record.query,
-      ageBand: record.age_band,
-      verdict: record.verdict,
-      ts: new Date(record.created_at).getTime()
-    }));
-  };
-
-  const currentHistory = useSupabase 
-    ? convertSupabaseToHistory(supabaseHistory)
-    : localHistory;
 
   const getAgeBadgeColor = (ageBand: string) => {
     switch (ageBand) {
@@ -141,57 +93,21 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
 
         <div className="hidden lg:flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Search History</h2>
-          <div className="flex items-center gap-2">
+          {history.length > 0 && (
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={toggleDataSource}
+              onClick={handleClearHistory}
               className="text-gray-500 hover:text-gray-700"
-              title={useSupabase ? "Switch to local storage" : "Switch to database"}
             >
-              {useSupabase ? <Database className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}
+              <Trash2 className="h-4 w-4" />
             </Button>
-            {currentHistory.length > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleClearHistory}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Data source indicator */}
-        <div className="mb-3 flex items-center gap-2 text-xs text-gray-500">
-          {useSupabase ? (
-            <>
-              <Database className="h-3 w-3" />
-              <span>Database history</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-3 w-3" />
-              <span>Local history</span>
-            </>
           )}
-          {isLoading && <span className="animate-pulse">Loading...</span>}
         </div>
 
         {/* Clear button for mobile */}
-        <div className="mb-4 lg:hidden space-y-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={toggleDataSource}
-            className="w-full text-gray-500 hover:text-gray-700"
-          >
-            {useSupabase ? <Database className="h-4 w-4 mr-2" /> : <Wifi className="h-4 w-4 mr-2" />}
-            {useSupabase ? "Database" : "Local"}
-          </Button>
-          {currentHistory.length > 0 && (
+        {history.length > 0 && (
+          <div className="mb-4 lg:hidden">
             <Button 
               variant="outline" 
               size="sm" 
@@ -201,19 +117,17 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
               <Trash2 className="h-4 w-4 mr-2" />
               Clear History
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
-        {currentHistory.length === 0 ? (
+        {history.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">
-              {isLoading ? 'Loading...' : 'No searches yet'}
-            </p>
+            <p className="text-sm">No searches yet</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {currentHistory.slice(0, 20).map((item, index) => (
+            {history.slice(0, 20).map((item, index) => (
               <Card 
                 key={`${item.q}-${item.ts}-${index}`}
                 className="p-3 cursor-pointer hover:shadow-md transition-shadow"
