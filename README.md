@@ -1,6 +1,8 @@
 # YTSafe - YouTube Kid-Safety Rater
 
-An ESRB-style content analysis tool for YouTube channels and videos to help parents make informed decisions about family-friendly viewing.
+🛡️ An ESRB-style content analysis tool for YouTube channels and videos to help parents make informed decisions about family-friendly viewing.
+
+**Live Demo**: [Visit YTSafe](https://ytsafe-dev-jianomads.vercel.app)
 
 ## Features
 
@@ -9,6 +11,10 @@ An ESRB-style content analysis tool for YouTube channels and videos to help pare
 - **Recent Video Analysis**: Reviews the latest videos from channels for current content assessment
 - **Search History**: Keep track of previously analyzed channels
 - **Mobile Responsive**: Works seamlessly on desktop and mobile devices
+
+## Quick Start
+
+Simply paste any YouTube channel URL, video URL, or @handle into the search bar to get an instant safety rating!
 
 ## How It Works
 
@@ -27,6 +33,8 @@ An ESRB-style content analysis tool for YouTube channels and videos to help pare
 
 ## Getting Started
 
+### Prerequisites
+
 This application requires API keys for:
 - YouTube Data API v3
 - OpenAI API
@@ -35,6 +43,15 @@ Set these as environment variables:
 - `YOUTUBE_API_KEY`
 - `OPENAI_API_KEY`
 
-## Live Demo
+### Local Development
 
-Visit the deployed application to try it out with your favorite YouTube channels!
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
