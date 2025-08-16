@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, MessageCircle, ThumbsUp, AlertTriangle } from 'lucide-react';
+import { ExternalLink, MessageCircle, ThumbsUp, AlertTriangle, TrendingUp, Eye } from 'lucide-react';
 import type { PerVideoScore } from '@/types';
 
 interface VideoListProps {
@@ -28,6 +28,24 @@ export function VideoList({ videos }: VideoListProps) {
     if (count < 1000000) return `${(count / 1000).toFixed(1)}K`;
     if (count < 1000000000) return `${(count / 1000000).toFixed(1)}M`;
     return `${(count / 1000000000).toFixed(1)}B`;
+  };
+
+  const getEngagementColor = (level: string) => {
+    switch (level) {
+      case 'suspicious': return 'text-red-600';
+      case 'high': return 'text-blue-600';
+      case 'low': return 'text-gray-500';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getEngagementIcon = (level: string) => {
+    switch (level) {
+      case 'suspicious': return <AlertTriangle className="h-3 w-3" />;
+      case 'high': return <TrendingUp className="h-3 w-3" />;
+      case 'low': return <Eye className="h-3 w-3" />;
+      default: return <ThumbsUp className="h-3 w-3" />;
+    }
   };
 
   return (
@@ -73,6 +91,15 @@ export function VideoList({ videos }: VideoListProps) {
                         </span>
                       </>
                     )}
+                    {video.engagementMetrics && (
+                      <>
+                        <span className="text-xs text-gray-400">•</span>
+                        <div className={`flex items-center gap-1 text-xs ${getEngagementColor(video.engagementMetrics.audienceEngagement)}`}>
+                          {getEngagementIcon(video.engagementMetrics.audienceEngagement)}
+                          <span className="capitalize">{video.engagementMetrics.audienceEngagement}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <Badge 
                     variant="secondary" 
@@ -104,6 +131,14 @@ export function VideoList({ videos }: VideoListProps) {
                         </Badge>
                       ))}
                     </div>
+                  </div>
+                )}
+                
+                {video.engagementMetrics && video.engagementMetrics.controversyScore > 0.5 && (
+                  <div className="mt-1">
+                    <Badge variant="outline" className="text-xs text-red-700 bg-red-50 border-red-200">
+                      High controversy ({Math.round(video.engagementMetrics.controversyScore * 100)}%)
+                    </Badge>
                   </div>
                 )}
               </div>

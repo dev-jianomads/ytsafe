@@ -11,6 +11,57 @@ const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitabilit
 
 const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and safety concerns. Output JSON with: "avgSentiment" (positive/neutral/negative), "communityFlags" (array of concerns like "inappropriate language", "mature discussions", "young audience present", "toxic behavior", etc.). Focus on family-safety implications. Output ONLY JSON.`;
 
+function calculateEngagementMetrics(
+  viewCount: number, 
+  likeCount: number, 
+  commentCount: number, 
+  daysOld: number,
+  commentAnalysis?: any
+) {
+  const likeToViewRatio = viewCount > 0 ? likeCount / viewCount : 0;
+  const commentToViewRatio = viewCount > 0 ? commentCount / viewCount : 0;
+  const engagementVelocity = viewCount / daysOld; // views per day
+  
+  // Calculate controversy score (0-1)
+  let controversyScore = 0;
+  
+  // High comment-to-view ratio often indicates controversial content
+  if (commentToViewRatio > 0.01) controversyScore += 0.3; // >1% comment rate
+  if (commentToViewRatio > 0.02) controversyScore += 0.2; // >2% comment rate
+  
+  // Very low like-to-view ratio can indicate disliked content
+  if (likeToViewRatio < 0.005 && viewCount > 1000) controversyScore += 0.2;
+  
+  // Negative community sentiment
+  if (commentAnalysis?.avgSentiment === 'negative') controversyScore += 0.3;
+  
+  // Community flags present
+  if (commentAnalysis?.communityFlags?.length > 0) {
+    controversyScore += Math.min(0.4, commentAnalysis.communityFlags.length * 0.1);
+  }
+  
+  controversyScore = Math.min(1, controversyScore);
+  
+  // Determine audience engagement level
+  let audienceEngagement: 'low' | 'normal' | 'high' | 'suspicious' = 'normal';
+  
+  if (commentToViewRatio > 0.03 || controversyScore > 0.8) {
+    audienceEngagement = 'suspicious'; // Unusually high engagement or controversy
+  } else if (likeToViewRatio > 0.05 || commentToViewRatio > 0.015) {
+    audienceEngagement = 'high';
+  } else if (likeToViewRatio < 0.002 && commentToViewRatio < 0.001 && viewCount > 1000) {
+    audienceEngagement = 'low'; // Possible clickbait or poor content
+  }
+  
+  return {
+    likeToViewRatio: Math.round(likeToViewRatio * 10000) / 10000, // 4 decimal places
+    commentToViewRatio: Math.round(commentToViewRatio * 10000) / 10000,
+    engagementVelocity: Math.round(engagementVelocity),
+    controversyScore: Math.round(controversyScore * 100) / 100, // 2 decimal places
+    audienceEngagement
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { q } = await req.json();
@@ -63,6 +114,12 @@ export async function POST(req: NextRequest) {
       // Process each video
       for (const video of detailsData.items ?? []) {
         const videoId = video.id;
+        const viewCount = Number(video.statistics?.viewCount ?? 0);
+        const likeCount = Number(video.statistics?.likeCount ?? 0);
+        const commentCount = Number(video.statistics?.commentCount ?? 0);
+        const publishedAt = new Date(video.snippet?.publishedAt ?? Date.now());
+        const daysOld = Math.max(1, (Date.now() - publishedAt.getTime()) / (1000 * 60 * 60 * 24));
+        
         let transcript = "";
         let comments: any[] = [];
         
@@ -100,6 +157,11 @@ export async function POST(req: NextRequest) {
         let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
         let riskNote = "";
         let commentAnalysis: any = undefined;
+        
+        // Calculate engagement metrics
+        const engagementMetrics = calculateEngagementMetrics(
+          viewCount, likeCount, commentCount, daysOld, commentAnalysis
+        );
 
         // Analyze comments separately for community insights
         if (comments.length > 0) {
@@ -228,7 +290,10 @@ export async function POST(req: NextRequest) {
           url: `https://www.youtube.com/watch?v=${videoId}`,
           title: video.snippet?.title ?? "Untitled",
           publishedAt: video.snippet?.publishedAt ?? "",
-          viewCount: Number(video.statistics?.viewCount ?? 0),
+          viewCount,
+          likeCount,
+          commentCount,
+          engagementMetrics,
           categoryScores,
           riskNote: riskNote.slice(0, 64),
           commentAnalysis
@@ -248,7 +313,19 @@ export async function POST(req: NextRequest) {
       videos.forEach((video, index) => {
         const recency = 1 - index * 0.04; // newest 1.0 → ~0.64
         const viewWeight = Math.log10((video.viewCount ?? 0) + 10) / 10;
-        const totalWeight = recency + viewWeight;
+        
+        // Add engagement-based risk weighting
+        let engagementRisk = 1.0;
+        if (video.engagementMetrics) {
+          const metrics = video.engagementMetrics;
+          
+          // Suspicious engagement patterns increase weight (more concerning)
+          if (metrics.audienceEngagement === 'suspicious') engagementRisk += 0.3;
+          if (metrics.controversyScore > 0.7) engagementRisk += 0.2;
+          if (metrics.engagementVelocity > 50000) engagementRisk += 0.1; // Viral content
+        }
+        
+        const totalWeight = (recency + viewWeight) * engagementRisk;
         
         for (const category of CATEGORIES) {
           weighted[category].sum += video.categoryScores[category] * totalWeight;

@@ -8,6 +8,15 @@ export type PerVideoScore = {
   title: string;
   publishedAt: string;
   viewCount?: number;
+  likeCount?: number;
+  commentCount?: number;
+  engagementMetrics?: {
+    likeToViewRatio: number;
+    commentToViewRatio: number;
+    engagementVelocity: number; // views per day
+    controversyScore: number; // 0-1, higher = more controversial
+    audienceEngagement: 'low' | 'normal' | 'high' | 'suspicious';
+  };
   categoryScores: Record<CategoryKey, 0|1|2|3|4>;
   riskNote: string;
   commentAnalysis?: {
