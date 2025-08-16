@@ -19,6 +19,7 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [shouldClearSearch, setShouldClearSearch] = useState(false);
+  const [historyKey, setHistoryKey] = useState(0); // Force history refresh
 
   const handleAnalyse = async (searchQuery: string) => {
     setIsLoading(true);
@@ -44,6 +45,7 @@ export default function Home() {
 
       setResults(data);
       saveToHistory(searchQuery, data.aggregate.ageBand, data.aggregate.verdict);
+      setHistoryKey(prev => prev + 1); // Trigger history refresh
       setShouldClearSearch(true);
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
@@ -80,6 +82,7 @@ export default function Home() {
       <div className="flex lg:grid lg:grid-cols-[320px_1fr] relative">
         {/* History Sidebar */}
         <HistoryPane 
+          key={historyKey}
           onSelectItem={handleSelectFromHistory}
           isOpen={isHistoryOpen}
           onClose={() => setIsHistoryOpen(false)}

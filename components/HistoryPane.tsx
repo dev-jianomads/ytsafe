@@ -18,8 +18,17 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
-    setHistory(getHistory());
-  }, []);
+    const loadHistory = () => {
+      setHistory(getHistory());
+    };
+    
+    loadHistory();
+    
+    // Also refresh when the component becomes visible
+    if (isOpen) {
+      loadHistory();
+    }
+  }, [isOpen]);
 
   const handleClearHistory = () => {
     clearHistory();
