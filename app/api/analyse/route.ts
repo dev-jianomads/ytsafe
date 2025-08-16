@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { ageFromScores, deriveBullets, makeVerdict, VideoScoreSchema, CATEGORIES } from "@/lib/rating";
 import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments } from "@/lib/youtube";
 import type { CategoryKey, PerVideoScore } from "@/types";
+import { generateSessionId, trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
 
 export const dynamic = 'force-dynamic';
 
@@ -65,14 +66,27 @@ function calculateEngagementMetrics(
 export async function POST(req: NextRequest) {
   try {
     const { q } = await req.json();
+    
+    // Generate session ID for analytics
+    const sessionId = generateSessionId();
+    const userAgent = req.headers.get('user-agent') || undefined;
+    
+    // Track token usage across all OpenAI calls
+    let totalPromptTokens = 0;
+    let totalCompletionTokens = 0;
+    let totalTokens = 0;
+    let openaiRequestsCount = 0;
+    
     const YT = process.env.YOUTUBE_API_KEY;
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
     
     if (!q || typeof q !== 'string') {
+      await trackFailedAnalysis(q || 'invalid_query', 'MISSING_QUERY', sessionId, userAgent);
       return NextResponse.json({ error: "MISSING_QUERY" }, { status: 400 });
     }
     
     if (!YT || !OPENAI_KEY) {
+      await trackFailedAnalysis(q, 'SERVER_MISCONFIG', sessionId, userAgent);
       return NextResponse.json({ error: "SERVER_MISCONFIG" }, { status: 500 });
     }
 
@@ -84,6 +98,7 @@ export async function POST(req: NextRequest) {
       // Resolve channel ID
       const channelId = await resolveChannelId(q, YT);
       if (!channelId) {
+        await trackFailedAnalysis(q, 'CHANNEL_NOT_FOUND', sessionId, userAgent);
         return NextResponse.json({ error: "CHANNEL_NOT_FOUND" }, { status: 404 });
       }
 
@@ -94,6 +109,7 @@ export async function POST(req: NextRequest) {
       ]);
 
       if (videoIds.length === 0) {
+        await trackFailedAnalysis(q, 'NO_VIDEOS_FOUND', sessionId, userAgent);
         return NextResponse.json({ error: "NO_VIDEOS_FOUND" }, { status: 404 });
       }
 
@@ -200,6 +216,14 @@ export async function POST(req: NextRequest) {
                 max_tokens: 100 // Reduced token usage
               });
 
+              // Track token usage for comment analysis
+              if (commentCompletion.usage) {
+                totalPromptTokens += commentCompletion.usage.prompt_tokens || 0;
+                totalCompletionTokens += commentCompletion.usage.completion_tokens || 0;
+                totalTokens += commentCompletion.usage.total_tokens || 0;
+                openaiRequestsCount++;
+              }
+
               const commentResponseText = commentCompletion.choices[0]?.message?.content ?? "{}";
               const commentParsed = JSON.parse(commentResponseText);
               
@@ -224,9 +248,14 @@ export async function POST(req: NextRequest) {
               max_tokens: 200
             });
 
-            // Log token usage
+            // Track token usage for main analysis
             const usage = completion.usage;
             if (usage) {
+              totalPromptTokens += usage.prompt_tokens || 0;
+              totalCompletionTokens += usage.completion_tokens || 0;
+              totalTokens += usage.total_tokens || 0;
+              openaiRequestsCount++;
+              
               console.log(`OpenAI Token Usage for video ${videoId}:`, {
                 prompt_tokens: usage.prompt_tokens,
                 completion_tokens: usage.completion_tokens,
@@ -257,9 +286,14 @@ export async function POST(req: NextRequest) {
                   max_tokens: 200
                 });
                 
-                // Log retry token usage
+                // Track retry token usage
                 const retryUsage = retryCompletion.usage;
                 if (retryUsage) {
+                  totalPromptTokens += retryUsage.prompt_tokens || 0;
+                  totalCompletionTokens += retryUsage.completion_tokens || 0;
+                  totalTokens += retryUsage.total_tokens || 0;
+                  openaiRequestsCount++;
+                  
                   console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
                     prompt_tokens: retryUsage.prompt_tokens,
                     completion_tokens: retryUsage.completion_tokens,
@@ -395,6 +429,20 @@ export async function POST(req: NextRequest) {
         }
       };
 
+      // Track successful analysis with token usage
+      await trackSuccessfulAnalysis(
+        q, 
+        analysisResult, 
+        sessionId, 
+        userAgent,
+        {
+          total_prompt_tokens: totalPromptTokens,
+          total_completion_tokens: totalCompletionTokens,
+          total_tokens: totalTokens,
+          openai_requests_count: openaiRequestsCount
+        }
+      );
+
       clearTimeout(timeoutId);
 
       return NextResponse.json(analysisResult);
@@ -405,10 +453,16 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Analysis error:', error);
     
+    // Track failed analysis
+    const sessionId = generateSessionId();
+    const userAgent = req.headers.get('user-agent') || undefined;
+    
     if (error.name === 'AbortError') {
+      await trackFailedAnalysis(req.body?.q || 'unknown', 'TIMEOUT', sessionId, userAgent);
       return NextResponse.json({ error: "TIMEOUT" }, { status: 408 });
     }
     
+    await trackFailedAnalysis(req.body?.q || 'unknown', 'ANALYSIS_FAILED', sessionId, userAgent);
     return NextResponse.json({ 
       error: "ANALYSIS_FAILED", 
       detail: error?.message ?? String(error) 
