@@ -273,7 +273,7 @@ export async function POST(req: NextRequest) {
               } catch (retryError) {
                 console.error(`JSON parsing failed for video ${videoId}:`, {
                   originalResponse: responseText,
-                  retryResponse: retryText || 'No retry response',
+                  retryResponse: retryCompletion.choices[0]?.message?.content || 'No retry response',
                   error: retryError
                 });
               }
