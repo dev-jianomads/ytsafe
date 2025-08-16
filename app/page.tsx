@@ -154,6 +154,79 @@ export default function Home() {
                   Paste a YouTube channel URL, video URL, or handle above to get an ESRB-style safety rating 
                   for family-friendly content evaluation.
                 </p>
+                
+                {/* How It Works Section */}
+                <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200 text-left max-w-2xl mx-auto">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-4 text-center">How Our Safety Analysis Works</h4>
+                  
+                  <div className="space-y-4 text-sm text-blue-800">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-blue-700">1</span>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1">We analyze what's actually said and shown</p>
+                        <p className="text-blue-700">Our AI reviews video transcripts, titles, and descriptions to understand the real content - not just what creators claim it is.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-blue-700">2</span>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1">We check how the community responds</p>
+                        <p className="text-blue-700">Comments reveal the real audience age and concerns. Toxic discussions or inappropriate language in comments affects the rating.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-blue-700">3</span>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1">We look for warning signs in engagement</p>
+                        <p className="text-blue-700">Unusual patterns like very high controversy, clickbait behavior, or suspicious engagement help identify potentially problematic content.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-blue-700">4</span>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1">We focus on recent videos</p>
+                        <p className="text-blue-700">Channels change over time. We analyze the 10 most recent videos to give you current safety information, not outdated ratings.</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-blue-100">
+                    <h5 className="font-semibold text-blue-900 mb-2">Rating Categories (Just Like Video Games)</h5>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-5 bg-green-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">E</div>
+                        <span className="text-blue-700">Ages 6 and under</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-5 bg-emerald-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">E10+</div>
+                        <span className="text-blue-700">Ages 7-10</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-5 bg-amber-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">T</div>
+                        <span className="text-blue-700">Ages 11-15</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-5 bg-red-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">16+</div>
+                        <span className="text-blue-700">Ages 16 and up</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-blue-600 mt-4 text-center italic">
+                    💡 <strong>Parent Tip:</strong> Always preview content yourself and consider your child's individual maturity level alongside these ratings.
+                  </p>
+                </div>
               </Card>
             )}
           </div>
