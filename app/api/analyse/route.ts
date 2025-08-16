@@ -109,7 +109,8 @@ export async function POST(req: NextRequest) {
       const openai = new OpenAI({ apiKey: OPENAI_KEY });
       const videos: PerVideoScore[] = [];
       const warnings: string[] = [];
-      let transcriptMissing = 0;
+      let transcriptAvailable = 0;
+      let totalVideos = detailsData.items?.length || 0;
 
       // Process each video
       for (const video of detailsData.items ?? []) {
@@ -126,8 +127,9 @@ export async function POST(req: NextRequest) {
         try {
           const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
           transcript = (transcriptData ?? []).map((t: any) => t.text).join(" ");
+          transcriptAvailable++;
         } catch (error) {
-          transcriptMissing++;
+          // Transcript not available - will be handled by threshold check
         }
 
         // Get top comments for community context
@@ -138,11 +140,18 @@ export async function POST(req: NextRequest) {
         }
 
         // Build content bundle for analysis
+        const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
+        const useTranscripts = transcriptAvailabilityRate >= 0.4;
+        
         let bundle = [
           video.snippet?.title ?? "",
-          video.snippet?.description ?? "",
-          transcript.slice(0, 6000)
+          video.snippet?.description ?? ""
         ].join("\n").trim();
+        
+        // Only include transcript if we have sufficient transcript coverage
+        if (useTranscripts && transcript) {
+          bundle += "\n" + transcript.slice(0, 6000);
+        }
 
         // Add top comments if available
         if (comments.length > 0) {
@@ -300,10 +309,11 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (transcriptMissing > 3) {
-        const transcriptAvailable = videos.length - transcriptMissing;
-        const availablePercent = Math.round((transcriptAvailable / videos.length) * 100);
-        warnings.push(`${transcriptMissing} transcripts missing (out of ${videos.length} videos analyzed). Only ${availablePercent}% of videos had transcripts available, which may result in less accurate content analysis since spoken content couldn't be evaluated.`);
+      // Check transcript availability and add appropriate warning
+      const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
+      if (transcriptAvailabilityRate < 0.4) {
+        const availablePercent = Math.round(transcriptAvailabilityRate * 100);
+        warnings.push(`Limited content analysis: Only ${availablePercent}% of videos had transcripts available. Ratings are based on titles, descriptions, comments, and engagement patterns only. This may result in less detailed content assessment since spoken content couldn't be evaluated.`);
       }
 
       // Aggregate scores
@@ -356,7 +366,13 @@ export async function POST(req: NextRequest) {
           verdict,
           bullets
         },
-        warnings: warnings.length > 0 ? warnings : undefined
+        warnings: warnings.length > 0 ? warnings : undefined,
+        transcriptCoverage: {
+          available: transcriptAvailable,
+          total: totalVideos,
+          percentage: Math.round(transcriptAvailabilityRate * 100),
+          sufficient: transcriptAvailabilityRate >= 0.4
+        }
       });
 
     } finally {

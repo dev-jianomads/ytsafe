@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { AlertTriangle } from 'lucide-react';
 import type { Aggregate } from '@/types';
 
 interface SummaryCardProps {
@@ -10,9 +11,15 @@ interface SummaryCardProps {
     thumbnail?: string;
     handle?: string;
   };
+  transcriptCoverage?: {
+    available: number;
+    total: number;
+    percentage: number;
+    sufficient: boolean;
+  };
 }
 
-export function SummaryCard({ aggregate, channel }: SummaryCardProps) {
+export function SummaryCard({ aggregate, channel, transcriptCoverage }: SummaryCardProps) {
   const getAgeBadgeColor = (ageBand: string) => {
     switch (ageBand) {
       case 'E': return 'bg-green-500 text-white hover:bg-green-600';
@@ -51,6 +58,15 @@ export function SummaryCard({ aggregate, channel }: SummaryCardProps) {
             >
               {aggregate.ageBand}
             </Badge>
+            {transcriptCoverage && !transcriptCoverage.sufficient && (
+              <Badge 
+                variant="outline" 
+                className="text-xs bg-amber-50 text-amber-700 border-amber-200 self-start flex items-center gap-1"
+              >
+                <AlertTriangle className="h-3 w-3" />
+                Limited Analysis ({transcriptCoverage.percentage}% transcripts)
+              </Badge>
+            )}
             {channel?.title && (
               <div className="hidden sm:block">
                 <h3 className="font-semibold text-gray-900">{channel.title}</h3>

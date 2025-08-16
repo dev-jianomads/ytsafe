@@ -44,6 +44,12 @@ export type AnalyseResponse = {
   videos: PerVideoScore[];
   aggregate: Aggregate;
   warnings?: string[];
+  transcriptCoverage?: {
+    available: number;
+    total: number;
+    percentage: number;
+    sufficient: boolean;
+  };
 };
 
 export type HistoryItem = {

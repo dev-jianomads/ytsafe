@@ -136,6 +136,7 @@ export default function Home() {
                 <SummaryCard 
                   aggregate={results.aggregate} 
                   channel={results.channel}
+                  transcriptCoverage={results.transcriptCoverage}
                 />
                 
                 <CategoryTable scores={results.aggregate.scores} />
