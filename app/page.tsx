@@ -140,6 +140,7 @@ export default function Home() {
                   aggregate={results.aggregate} 
                   channel={results.channel}
                   transcriptCoverage={results.transcriptCoverage}
+                  videos={results.videos}
                 />
                 
                 <CategoryTable scores={results.aggregate.scores} />

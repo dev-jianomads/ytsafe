@@ -1,7 +1,9 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Share } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Aggregate } from '@/types';
 
 interface SummaryCardProps {
@@ -17,9 +19,14 @@ interface SummaryCardProps {
     percentage: number;
     sufficient: boolean;
   };
+  videos?: Array<{
+    title: string;
+    riskNote: string;
+    categoryScores: Record<string, number>;
+  }>;
 }
 
-export function SummaryCard({ aggregate, channel, transcriptCoverage }: SummaryCardProps) {
+export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: SummaryCardProps) {
   const getAgeBadgeColor = (ageBand: string) => {
     switch (ageBand) {
       case 'E': return 'bg-green-500 text-white hover:bg-green-600';
@@ -30,8 +37,121 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage }: SummaryC
     }
   };
 
+  const getScoreLabel = (score: number) => {
+    if (score <= 0.5) return 'None';
+    if (score <= 1.5) return 'Mild';
+    if (score <= 2.5) return 'Moderate';
+    if (score <= 3.5) return 'Strong';
+    return 'Extreme';
+  };
+
+  const categoryLabels: Record<string, string> = {
+    violence: "Violence",
+    language: "Language",
+    sexual_content: "Sexual Content",
+    substances: "Substances",
+    sensitive_topics: "Sensitive Topics",
+    commercial_pressure: "Commercial Pressure"
+  };
+
+  const handleShare = async () => {
+    const channelName = channel?.title || 'Unknown Channel';
+    const channelHandle = channel?.handle ? ` (${channel.handle})` : '';
+    
+    // Build the share text
+    let shareText = `YouTube Safety Analysis - ${channelName}${channelHandle}\n`;
+    shareText += `${'='.repeat(shareText.length - 1)}\n\n`;
+    
+    // Age rating and verdict
+    shareText += `Age Rating: ${aggregate.ageBand}`;
+    const ageDescription = {
+      'E': ' (Ages 6 and under)',
+      'E10+': ' (Ages 7-10)',
+      'T': ' (Ages 11-15)',
+      '16+': ' (Ages 16 and up)'
+    };
+    shareText += `${ageDescription[aggregate.ageBand] || ''}\n`;
+    shareText += `Verdict: ${aggregate.verdict}\n\n`;
+    
+    // Content breakdown
+    shareText += `Content Breakdown:\n`;
+    Object.entries(aggregate.scores).forEach(([category, score]) => {
+      const label = categoryLabels[category] || category;
+      const scoreLabel = getScoreLabel(score);
+      shareText += `• ${label}: ${score.toFixed(1)}/4 (${scoreLabel})\n`;
+    });
+    
+    // Why this rating
+    shareText += `\nWhy this rating:\n`;
+    aggregate.bullets.forEach(bullet => {
+      shareText += `• ${bullet}\n`;
+    });
+    
+    // Transcript coverage warning if applicable
+    if (transcriptCoverage && !transcriptCoverage.sufficient) {
+      shareText += `\n⚠️  Limited Analysis: Only ${transcriptCoverage.percentage}% of videos had transcripts available.\n`;
+    }
+    
+    // Recent videos summary
+    if (videos && videos.length > 0) {
+      shareText += `\nRecent Videos Analyzed (${videos.length}):\n`;
+      videos.slice(0, 5).forEach(video => {
+        const maxScore = Math.max(...Object.values(video.categoryScores));
+        const riskIcon = maxScore <= 1 ? '✓' : maxScore === 2 ? '⚠️' : '🔴';
+        const truncatedTitle = video.title.length > 50 ? 
+          video.title.substring(0, 47) + '...' : video.title;
+        shareText += `${riskIcon} "${truncatedTitle}" - ${video.riskNote}\n`;
+      });
+      
+      if (videos.length > 5) {
+        shareText += `... and ${videos.length - 5} more videos\n`;
+      }
+    }
+    
+    // Footer
+    shareText += `\n---\n`;
+    shareText += `Analysis by YouTube Children-Safety Reviewer\n`;
+    shareText += `Always preview content yourself and consider your child's individual maturity level.`;
+    
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast.success('Analysis copied to clipboard!', {
+        description: 'You can now paste this safety report anywhere.',
+        duration: 3000,
+      });
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      toast.success('Analysis copied to clipboard!', {
+        description: 'You can now paste this safety report anywhere.',
+        duration: 3000,
+      });
+    }
+  };
+
   return (
     <Card className="p-4 sm:p-6 mb-6">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex-1 min-w-0">
+          {/* Existing content will go here */}
+        </div>
+        <Button
+          onClick={handleShare}
+          variant="outline"
+          size="sm"
+          className="ml-4 flex-shrink-0 gap-2"
+        >
+          <Share className="h-4 w-4" />
+          Share
+        </Button>
+      </div>
+      
       <div className="flex flex-col sm:flex-row items-start gap-4">
         <div className="flex items-center gap-4 w-full sm:w-auto">
           {channel?.thumbnail && (
