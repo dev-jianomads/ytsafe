@@ -43,6 +43,7 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
     }
     
     setIsLoading(false);
+  }, [useSupabase]);
 
   useEffect(() => {
     loadHistory();
