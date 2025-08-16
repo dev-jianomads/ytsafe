@@ -121,9 +121,7 @@ export async function POST(req: NextRequest) {
 
       // Process videos in parallel batches
       for (const batch of videoBatches) {
-        const batchPromises = batch.map(async (video) => {
-        }
-        )
+        const batchPromises = batch.map(async (video: any) => {
         const videoId = video.id;
         const viewCount = Number(video.statistics?.viewCount ?? 0);
         const likeCount = Number(video.statistics?.likeCount ?? 0);
@@ -307,6 +305,12 @@ export async function POST(req: NextRequest) {
               CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
             ) as Record<CategoryKey, 0|1|2|3|4>;
             riskNote = result.data.riskNote;
+        });
+
+        // Wait for batch to complete and add to videos array
+        const batchResults = await Promise.all(batchPromises);
+        videos.push(...batchResults);
+      }
           } else {
             throw new Error("Invalid classification response");
           }
