@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, Menu } from 'lucide-react';
@@ -10,10 +10,18 @@ interface SearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   onToggleHistory: () => void;
+  shouldClearAfterAnalysis?: boolean;
 }
 
-export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHistory }: SearchBarProps) {
+export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHistory, shouldClearAfterAnalysis }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
+
+  // Clear search box when analysis completes
+  useEffect(() => {
+    if (shouldClearAfterAnalysis && !isLoading) {
+      setQuery('');
+    }
+  }, [shouldClearAfterAnalysis, isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +42,6 @@ export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHis
         >
           <Menu className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Kid-Safety Rater</h1>
         <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Children-Safety Reviewer</h1>
       </div>
 

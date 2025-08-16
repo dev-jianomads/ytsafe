@@ -18,12 +18,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [shouldClearSearch, setShouldClearSearch] = useState(false);
 
   const handleAnalyse = async (searchQuery: string) => {
     setIsLoading(true);
     setError(null);
     setResults(null);
     setQuery(searchQuery);
+    setShouldClearSearch(false);
 
     try {
       const response = await fetch('/api/analyse', {
@@ -42,6 +44,7 @@ export default function Home() {
 
       setResults(data);
       saveToHistory(searchQuery, data.aggregate.ageBand, data.aggregate.verdict);
+      setShouldClearSearch(true);
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -65,8 +68,10 @@ export default function Home() {
         return 'Analysis timed out. Please try again.';
       case 'SERVER_MISCONFIG':
         return 'Server configuration error. API keys may be missing.';
+      case 'ANALYSIS_FAILED':
+        return 'Content analysis failed. This could be due to API rate limits, content restrictions, or temporary service issues. Please try again in a few minutes.';
       default:
-        return `Analysis failed: ${errorCode}`;
+        return `Analysis failed (${errorCode}). This could be due to API rate limits, network issues, or temporary service problems. Please try again later.`;
     }
   };
 
@@ -99,6 +104,7 @@ export default function Home() {
             isLoading={isLoading}
             initialQuery={query}
             onToggleHistory={() => setIsHistoryOpen(true)}
+           shouldClearAfterAnalysis={shouldClearSearch}
           />
 
           {/* Results Area */}

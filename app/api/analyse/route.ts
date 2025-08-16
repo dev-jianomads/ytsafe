@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
             CATEGORIES.map(k => [k, 1])
           ) as Record<CategoryKey, 0|1|2|3|4>;
           riskNote = "analysis failed";
-          warnings.push(`Classification failed for video ${videoId}`);
+          warnings.push(`Classification failed for video ${videoId}: ${error instanceof Error ? error.message : 'Unknown error'}. Using conservative fallback ratings.`);
         }
 
         const maxScore = Math.max(...Object.values(categoryScores));
