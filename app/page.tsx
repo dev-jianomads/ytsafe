@@ -86,7 +86,7 @@ export default function Home() {
         />
         
         {/* Main Content */}
-        <div className="flex flex-col gradient-bg flex-1 min-w-0">
+        <div className="flex flex-col gradient-bg flex-1 min-w-0 min-h-screen">
           {/* Header */}
           <div className="hidden lg:block bg-white border-b px-6 py-4">
             <div className="flex items-center gap-3">
@@ -108,7 +108,7 @@ export default function Home() {
           />
 
           {/* Results Area */}
-          <div className="flex-1 p-4 sm:p-6">
+          <div className="flex-1 p-4 sm:p-6 min-h-0">
             {error && (
               <Alert className="mb-6 border-red-200 bg-red-50">
                 <AlertTriangle className="h-4 w-4 text-red-600" />
