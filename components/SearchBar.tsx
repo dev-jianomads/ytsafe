@@ -35,6 +35,7 @@ export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHis
           <Menu className="h-4 w-4" />
         </Button>
         <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Kid-Safety Rater</h1>
+        <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Children-Safety Reviewer</h1>
       </div>
 
       {/* ESRB Description */}

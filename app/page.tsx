@@ -87,7 +87,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <Shield className="h-8 w-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">YouTube Kid-Safety Rater</h1>
+                <h1 className="text-2xl font-bold text-gray-900">YouTube Children-Safety Reviewer</h1>
                 <p className="text-sm text-gray-600">ESRB-style content analysis for family-friendly viewing</p>
               </div>
             </div>
