@@ -122,232 +122,212 @@ export async function POST(req: NextRequest) {
       // Process videos in parallel batches
       for (const batch of videoBatches) {
         const batchPromises = batch.map(async (video: any) => {
-        const videoId = video.id;
-        const viewCount = Number(video.statistics?.viewCount ?? 0);
-        const likeCount = Number(video.statistics?.likeCount ?? 0);
-        const commentCount = Number(video.statistics?.commentCount ?? 0);
-        const publishedAt = new Date(video.snippet?.publishedAt ?? Date.now());
-        const daysOld = Math.max(1, (Date.now() - publishedAt.getTime()) / (1000 * 60 * 60 * 24));
-        
-        let transcript = "";
-        let comments: any[] = [];
-        
-        // Get transcript and comments in parallel
-        const [transcriptResult, commentsResult] = await Promise.allSettled([
-          YoutubeTranscript.fetchTranscript(videoId).then(data => 
-            (data ?? []).map((t: any) => t.text).join(" ")
-          ).catch(() => ""),
-          getVideoComments(videoId, YT, 10) // Reduced from 15 to 10 comments
-        ]);
-
-        if (transcriptResult.status === 'fulfilled' && transcriptResult.value) {
-          transcript = transcriptResult.value;
-          transcriptAvailable++;
-        }
-
-        if (commentsResult.status === 'fulfilled') {
-          comments = commentsResult.value;
-        }
-
-
-        // Build content bundle for analysis
-        const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
-        const useTranscripts = transcriptAvailabilityRate >= 0.4;
-        
-        let bundle = [
-          video.snippet?.title ?? "",
-          video.snippet?.description ?? ""
-        ].join("\n").trim();
-        
-        // Only include transcript if we have sufficient transcript coverage
-        if (useTranscripts && transcript) {
-          bundle += "\n" + transcript.slice(0, 6000);
-        }
-
-        // Add top comments if available
-        if (comments.length > 0) {
-          const commentText = comments
-            .slice(0, 8) // Reduced to top 8 comments
-            .map(c => `Comment (${c.likeCount} likes): ${c.text}`)
-            .join("\n");
-          bundle += "\n\nTOP COMMENTS:\n" + commentText.slice(0, 1500); // Reduced token usage
-        }
-
-        // Classify with OpenAI
-        let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
-        let riskNote = "";
-        let commentAnalysis: any = undefined;
-        
-        // Calculate engagement metrics
-        const engagementMetrics = calculateEngagementMetrics(
-          viewCount, likeCount, commentCount, daysOld, commentAnalysis
-        );
-
-        // Analyze comments separately for community insights (only if we have enough comments)
-        if (comments.length >= 3) { // Only analyze if we have at least 3 comments
-          try {
-            const commentBundle = comments
-              .slice(0, 8) // Reduced comment analysis scope
-              .map(c => `${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
-              .join("\n");
-
-            const commentCompletion = await openai.chat.completions.create({
-              model: "gpt-4o-mini",
-              messages: [
-                { role: "system", content: COMMENT_ANALYSIS_PROMPT },
-                { role: "user", content: commentBundle }
-              ],
-              temperature: 0.2,
-              max_tokens: 100 // Reduced token usage
-            });
-
-            const commentResponseText = commentCompletion.choices[0]?.message?.content ?? "{}";
-            const commentParsed = JSON.parse(commentResponseText);
-            
-            commentAnalysis = {
-              totalComments: comments.length,
-              avgSentiment: commentParsed.avgSentiment || 'neutral',
-              communityFlags: commentParsed.communityFlags || []
-            };
-          } catch (error) {
-            console.warn(`Comment analysis failed for video ${videoId}:`, error);
-          }
-        }
-
-        try {
-          const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "user", content: bundle }
-            ],
-            temperature: 0.2,
-            max_tokens: 200
-          });
-
-          // Log token usage
-          const usage = completion.usage;
-          if (usage) {
-            console.log(`OpenAI Token Usage for video ${videoId}:`, {
-              prompt_tokens: usage.prompt_tokens,
-              completion_tokens: usage.completion_tokens,
-              total_tokens: usage.total_tokens,
-              bundle_length: bundle.length
-            });
-          }
-
-          const responseText = completion.choices[0]?.message?.content ?? "{}";
-          let parsed: any = null;
+          const videoId = video.id;
+          const viewCount = Number(video.statistics?.viewCount ?? 0);
+          const likeCount = Number(video.statistics?.likeCount ?? 0);
+          const commentCount = Number(video.statistics?.commentCount ?? 0);
+          const publishedAt = new Date(video.snippet?.publishedAt ?? Date.now());
+          const daysOld = Math.max(1, (Date.now() - publishedAt.getTime()) / (1000 * 60 * 60 * 24));
           
-          try {
-            // Try to extract JSON from response (in case there's extra text)
-            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-            const jsonString = jsonMatch ? jsonMatch[0] : responseText;
-            parsed = JSON.parse(jsonString);
-          } catch {
-            // Retry with explicit formatting instruction
+          let transcript = "";
+          let comments: any[] = [];
+          
+          // Get transcript and comments in parallel
+          const [transcriptResult, commentsResult] = await Promise.allSettled([
+            YoutubeTranscript.fetchTranscript(videoId).then(data => 
+              (data ?? []).map((t: any) => t.text).join(" ")
+            ).catch(() => ""),
+            getVideoComments(videoId, YT, 10) // Reduced from 15 to 10 comments
+          ]);
+
+          if (transcriptResult.status === 'fulfilled' && transcriptResult.value) {
+            transcript = transcriptResult.value;
+            transcriptAvailable++;
+          }
+
+          if (commentsResult.status === 'fulfilled') {
+            comments = commentsResult.value;
+          }
+
+          // Build content bundle for analysis
+          const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
+          const useTranscripts = transcriptAvailabilityRate >= 0.4;
+          
+          let bundle = [
+            video.snippet?.title ?? "",
+            video.snippet?.description ?? ""
+          ].join("\n").trim();
+          
+          // Only include transcript if we have sufficient transcript coverage
+          if (useTranscripts && transcript) {
+            bundle += "\n" + transcript.slice(0, 6000);
+          }
+
+          // Add top comments if available
+          if (comments.length > 0) {
+            const commentText = comments
+              .slice(0, 8) // Reduced to top 8 comments
+              .map(c => `Comment (${c.likeCount} likes): ${c.text}`)
+              .join("\n");
+            bundle += "\n\nTOP COMMENTS:\n" + commentText.slice(0, 1500); // Reduced token usage
+          }
+
+          // Classify with OpenAI
+          let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
+          let riskNote = "";
+          let commentAnalysis: any = undefined;
+          
+          // Calculate engagement metrics
+          const engagementMetrics = calculateEngagementMetrics(
+            viewCount, likeCount, commentCount, daysOld, commentAnalysis
+          );
+
+          // Analyze comments separately for community insights (only if we have enough comments)
+          if (comments.length >= 3) { // Only analyze if we have at least 3 comments
             try {
-              const retryCompletion = await openai.chat.completions.create({
+              const commentBundle = comments
+                .slice(0, 8) // Reduced comment analysis scope
+                .map(c => `${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
+                .join("\n");
+
+              const commentCompletion = await openai.chat.completions.create({
                 model: "gpt-4o-mini",
                 messages: [
-                  { role: "system", content: COMMENT_ANALYSIS_PROMPT + " CRITICAL: Return ONLY valid JSON, no other text." },
-                  { role: "user", content: bundle }
+                  { role: "system", content: COMMENT_ANALYSIS_PROMPT },
+                  { role: "user", content: commentBundle }
                 ],
-                temperature: 0.1,
-                max_tokens: 200
-              }
-              )
-              
-              let commentParsed: any;
-              try {
-                const commentJsonMatch = commentResponseText.match(/\{[\s\S]*\}/);
-                const commentJsonString = commentJsonMatch ? commentJsonMatch[0] : commentResponseText;
-                commentParsed = JSON.parse(commentJsonString);
-              } catch (parseError) {
-                console.warn(`Comment analysis JSON parsing failed for video ${videoId}:`, {
-                  response: commentResponseText,
-                  error: parseError
-                });
-                commentParsed = { avgSentiment: 'neutral', communityFlags: [] };
-              }
-              
-              // Log retry token usage
-              const retryUsage = retryCompletion.usage;
-              if (retryUsage) {
-                console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
-                  prompt_tokens: retryUsage.prompt_tokens,
-                  completion_tokens: retryUsage.completion_tokens,
-                  total_tokens: retryUsage.total_tokens
-                });
-              }
+                temperature: 0.2,
+                max_tokens: 100 // Reduced token usage
+              });
 
-              const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
-              const retryJsonMatch = retryText.match(/\{[\s\S]*\}/);
-              const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
-              parsed = JSON.parse(retryJsonString);
-            } catch (retryError) {
-              console.error(`JSON parsing failed for video ${videoId}:`, {
-                originalResponse: responseText,
-                retryResponse: retryText || 'No retry response',
-                error: retryError
-              });
-              console.warn(`Comment analysis failed for video ${videoId}:`, {
-                error: error instanceof Error ? error.message : 'Unknown error',
-                commentCount: comments.length
-              });
+              const commentResponseText = commentCompletion.choices[0]?.message?.content ?? "{}";
+              const commentParsed = JSON.parse(commentResponseText);
+              
+              commentAnalysis = {
+                totalComments: comments.length,
+                avgSentiment: commentParsed.avgSentiment || 'neutral',
+                communityFlags: commentParsed.communityFlags || []
+              };
+            } catch (error) {
+              console.warn(`Comment analysis failed for video ${videoId}:`, error);
             }
           }
 
-          // Validate and sanitize scores
-          const result = VideoScoreSchema.safeParse(parsed);
-          if (result.success) {
+          try {
+            const completion = await openai.chat.completions.create({
+              model: "gpt-4o-mini",
+              messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                { role: "user", content: bundle }
+              ],
+              temperature: 0.2,
+              max_tokens: 200
+            });
+
+            // Log token usage
+            const usage = completion.usage;
+            if (usage) {
+              console.log(`OpenAI Token Usage for video ${videoId}:`, {
+                prompt_tokens: usage.prompt_tokens,
+                completion_tokens: usage.completion_tokens,
+                total_tokens: usage.total_tokens,
+                bundle_length: bundle.length
+              });
+            }
+
+            const responseText = completion.choices[0]?.message?.content ?? "{}";
+            let parsed: any = null;
+            
+            try {
+              // Try to extract JSON from response (in case there's extra text)
+              const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+              const jsonString = jsonMatch ? jsonMatch[0] : responseText;
+              parsed = JSON.parse(jsonString);
+            } catch {
+              // Retry with explicit formatting instruction
+              try {
+                const retryCompletion = await openai.chat.completions.create({
+                  model: "gpt-4o-mini",
+                  messages: [
+                    { role: "system", content: SYSTEM_PROMPT + " CRITICAL: Return ONLY valid JSON, no other text." },
+                    { role: "user", content: bundle }
+                  ],
+                  temperature: 0.1,
+                  max_tokens: 200
+                });
+                
+                // Log retry token usage
+                const retryUsage = retryCompletion.usage;
+                if (retryUsage) {
+                  console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
+                    prompt_tokens: retryUsage.prompt_tokens,
+                    completion_tokens: retryUsage.completion_tokens,
+                    total_tokens: retryUsage.total_tokens
+                  });
+                }
+
+                const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
+                const retryJsonMatch = retryText.match(/\{[\s\S]*\}/);
+                const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
+                parsed = JSON.parse(retryJsonString);
+              } catch (retryError) {
+                console.error(`JSON parsing failed for video ${videoId}:`, {
+                  originalResponse: responseText,
+                  retryResponse: retryText || 'No retry response',
+                  error: retryError
+                });
+              }
+            }
+
+            // Validate and sanitize scores
+            const result = VideoScoreSchema.safeParse(parsed);
+            if (result.success) {
+              categoryScores = Object.fromEntries(
+                CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
+              ) as Record<CategoryKey, 0|1|2|3|4>;
+              riskNote = result.data.riskNote;
+            } else {
+              throw new Error("Invalid classification response");
+            }
+          } catch (error) {
+            // Fallback to conservative defaults
+            console.error(`OpenAI analysis failed for video ${videoId}:`, {
+              error: error instanceof Error ? error.message : 'Unknown error',
+              videoTitle: video.snippet?.title,
+              bundleLength: bundle.length
+            });
+            
             categoryScores = Object.fromEntries(
-              CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
+              CATEGORIES.map(k => [k, 1])
             ) as Record<CategoryKey, 0|1|2|3|4>;
-            riskNote = result.data.riskNote;
+            riskNote = "analysis failed";
+            warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
+          }
+
+          const maxScore = Math.max(...Object.values(categoryScores));
+          if (!riskNote) {
+            riskNote = maxScore >= 3 ? "strong content" : 
+                      maxScore === 2 ? "moderate content" : "mild content";
+          }
+
+          return {
+            videoId,
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            title: video.snippet?.title ?? "Untitled",
+            publishedAt: video.snippet?.publishedAt ?? "",
+            viewCount,
+            likeCount,
+            commentCount,
+            engagementMetrics,
+            categoryScores,
+            riskNote: riskNote.slice(0, 64),
+            commentAnalysis
+          };
         });
 
         // Wait for batch to complete and add to videos array
         const batchResults = await Promise.all(batchPromises);
         videos.push(...batchResults);
-      }
-          } else {
-            throw new Error("Invalid classification response");
-          }
-        } catch (error) {
-          // Fallback to conservative defaults
-          console.error(`OpenAI analysis failed for video ${videoId}:`, {
-            error: error instanceof Error ? error.message : 'Unknown error',
-            videoTitle: video.snippet?.title,
-            bundleLength: bundle.length
-          });
-          
-          categoryScores = Object.fromEntries(
-            CATEGORIES.map(k => [k, 1])
-          ) as Record<CategoryKey, 0|1|2|3|4>;
-          riskNote = "analysis failed";
-          warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
-        }
-
-        const maxScore = Math.max(...Object.values(categoryScores));
-        if (!riskNote) {
-          riskNote = maxScore >= 3 ? "strong content" : 
-                    maxScore === 2 ? "moderate content" : "mild content";
-        }
-
-        videos.push({
-          videoId,
-          url: `https://www.youtube.com/watch?v=${videoId}`,
-          title: video.snippet?.title ?? "Untitled",
-          publishedAt: video.snippet?.publishedAt ?? "",
-          viewCount,
-          likeCount,
-          commentCount,
-          engagementMetrics,
-          categoryScores,
-          riskNote: riskNote.slice(0, 64),
-          commentAnalysis
-        });
       }
 
       // Check transcript availability and add appropriate warning
