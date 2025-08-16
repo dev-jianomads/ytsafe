@@ -10,6 +10,11 @@ export type PerVideoScore = {
   viewCount?: number;
   categoryScores: Record<CategoryKey, 0|1|2|3|4>;
   riskNote: string;
+  commentAnalysis?: {
+    totalComments: number;
+    avgSentiment: 'positive' | 'neutral' | 'negative';
+    communityFlags: string[];
+  };
 };
 
 export type Aggregate = {

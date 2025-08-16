@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { YoutubeTranscript } from "youtube-transcript";
 import OpenAI from "openai";
 import { ageFromScores, deriveBullets, makeVerdict, VideoScoreSchema, CATEGORIES } from "@/lib/rating";
-import { resolveChannelId, listRecentVideoIds, getChannelInfo } from "@/lib/youtube";
+import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments } from "@/lib/youtube";
 import type { CategoryKey, PerVideoScore } from "@/types";
 
 export const dynamic = 'force-dynamic';
 
-const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input is the title/description/transcript excerpt of a single YouTube video. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, sensitive_topics, commercial_pressure. Consider innuendo, hate slurs, graphic detail, drug instructions, self-harm, and aggressive advertising reads. Prefer conservative ratings for ambiguity. Also include a short "riskNote" (3–6 words). Output ONLY JSON.`;
+const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, sensitive_topics, commercial_pressure. Consider innuendo, hate slurs, graphic detail, drug instructions, self-harm, and aggressive advertising reads. Factor in community discussion tone and appropriateness. Prefer conservative ratings for ambiguity. Also include a short "riskNote" (3–6 words). Output ONLY JSON.`;
+
+const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and safety concerns. Output JSON with: "avgSentiment" (positive/neutral/negative), "communityFlags" (array of concerns like "inappropriate language", "mature discussions", "young audience present", "toxic behavior", etc.). Focus on family-safety implications. Output ONLY JSON.`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,6 +64,7 @@ export async function POST(req: NextRequest) {
       for (const video of detailsData.items ?? []) {
         const videoId = video.id;
         let transcript = "";
+        let comments: any[] = [];
         
         try {
           const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
@@ -70,16 +73,75 @@ export async function POST(req: NextRequest) {
           transcriptMissing++;
         }
 
+        // Get top comments for community context
+        try {
+          comments = await getVideoComments(videoId, YT, 15);
+        } catch (error) {
+          console.warn(`Failed to get comments for video ${videoId}:`, error);
+        }
+
         // Build content bundle for analysis
-        const bundle = [
+        let bundle = [
           video.snippet?.title ?? "",
           video.snippet?.description ?? "",
           transcript.slice(0, 6000)
         ].join("\n").trim();
 
+        // Add top comments if available
+        if (comments.length > 0) {
+          const commentText = comments
+            .slice(0, 10) // Top 10 comments
+            .map(c => `Comment (${c.likeCount} likes): ${c.text}`)
+            .join("\n");
+          bundle += "\n\nTOP COMMENTS:\n" + commentText.slice(0, 2000);
+        }
+
         // Classify with OpenAI
         let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
         let riskNote = "";
+        let commentAnalysis: any = undefined;
+
+        // Analyze comments separately for community insights
+        if (comments.length > 0) {
+          try {
+            const commentBundle = comments
+              .slice(0, 15)
+              .map(c => `${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
+              .join("\n");
+
+            const commentCompletion = await openai.chat.completions.create({
+              model: "gpt-4o-mini",
+              messages: [
+                { role: "system", content: COMMENT_ANALYSIS_PROMPT },
+                { role: "user", content: commentBundle }
+              ],
+              temperature: 0.2,
+              max_tokens: 150
+            });
+
+            // Log comment analysis token usage
+            const commentUsage = commentCompletion.usage;
+            if (commentUsage) {
+              console.log(`OpenAI Comment Analysis Token Usage for video ${videoId}:`, {
+                prompt_tokens: commentUsage.prompt_tokens,
+                completion_tokens: commentUsage.completion_tokens,
+                total_tokens: commentUsage.total_tokens,
+                comment_count: comments.length
+              });
+            }
+
+            const commentResponseText = commentCompletion.choices[0]?.message?.content ?? "{}";
+            const commentParsed = JSON.parse(commentResponseText);
+            
+            commentAnalysis = {
+              totalComments: comments.length,
+              avgSentiment: commentParsed.avgSentiment || 'neutral',
+              communityFlags: commentParsed.communityFlags || []
+            };
+          } catch (error) {
+            console.warn(`Comment analysis failed for video ${videoId}:`, error);
+          }
+        }
 
         try {
           const completion = await openai.chat.completions.create({
@@ -168,7 +230,8 @@ export async function POST(req: NextRequest) {
           publishedAt: video.snippet?.publishedAt ?? "",
           viewCount: Number(video.statistics?.viewCount ?? 0),
           categoryScores,
-          riskNote: riskNote.slice(0, 64)
+          riskNote: riskNote.slice(0, 64),
+          commentAnalysis
         });
       }
 

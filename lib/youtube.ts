@@ -77,6 +77,37 @@ export async function resolveChannelId(q: string, apiKey: string): Promise<strin
   return data.items?.[0]?.snippet?.channelId ?? "";
 }
 
+export async function getVideoComments(videoId: string, apiKey: string, maxResults: number = 20) {
+  const commentsUrl = new URL('https://www.googleapis.com/youtube/v3/commentThreads');
+  commentsUrl.searchParams.set('part', 'snippet');
+  commentsUrl.searchParams.set('videoId', videoId);
+  commentsUrl.searchParams.set('order', 'relevance'); // Get top comments
+  commentsUrl.searchParams.set('maxResults', maxResults.toString());
+  commentsUrl.searchParams.set('key', apiKey);
+  
+  try {
+    const response = await fetch(commentsUrl);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      // Comments might be disabled or restricted
+      return [];
+    }
+    
+    return (data.items ?? []).map((item: any) => ({
+      id: item.id,
+      text: item.snippet.topLevelComment.snippet.textDisplay,
+      author: item.snippet.topLevelComment.snippet.authorDisplayName,
+      likeCount: item.snippet.topLevelComment.snippet.likeCount || 0,
+      publishedAt: item.snippet.topLevelComment.snippet.publishedAt,
+      replyCount: item.snippet.totalReplyCount || 0
+    }));
+  } catch (error) {
+    console.warn(`Failed to fetch comments for video ${videoId}:`, error);
+    return [];
+  }
+}
+
 export async function listRecentVideoIds(channelId: string, apiKey: string, max: number = 10): Promise<string[]> {
   const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
   searchUrl.searchParams.set('part', 'snippet');

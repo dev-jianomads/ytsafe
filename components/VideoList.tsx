@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, MessageCircle, ThumbsUp, AlertTriangle } from 'lucide-react';
 import type { PerVideoScore } from '@/types';
 
 interface VideoListProps {
@@ -80,7 +80,32 @@ export function VideoList({ videos }: VideoListProps) {
                   >
                     {video.riskNote}
                   </Badge>
+                  
+                  {video.commentAnalysis && (
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <MessageCircle className="h-3 w-3" />
+                      <span>{video.commentAnalysis.totalComments}</span>
+                      {video.commentAnalysis.avgSentiment === 'negative' && (
+                        <AlertTriangle className="h-3 w-3 text-amber-500" />
+                      )}
+                      {video.commentAnalysis.avgSentiment === 'positive' && (
+                        <ThumbsUp className="h-3 w-3 text-green-500" />
+                      )}
+                    </div>
+                  )}
                 </div>
+                
+                {video.commentAnalysis?.communityFlags && video.commentAnalysis.communityFlags.length > 0 && (
+                  <div className="mt-1">
+                    <div className="flex flex-wrap gap-1">
+                      {video.commentAnalysis.communityFlags.slice(0, 2).map((flag, idx) => (
+                        <Badge key={idx} variant="outline" className="text-xs text-amber-700 bg-amber-50 border-amber-200">
+                          {flag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );
