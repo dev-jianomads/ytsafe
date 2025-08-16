@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Clock, X, Database, Wifi, WifiOff } from 'lucide-react';
 import type { HistoryItem } from '@/types';
 import { getHistory, clearHistory } from '@/lib/history';
-import { getRecentSearches, type SearchRecord } from '@/lib/supabase';
 
 interface HistoryPaneProps {
   onSelectItem: (query: string) => void;
