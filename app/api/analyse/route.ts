@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const { q } = await req.json();
     const YT = process.env.YOUTUBE_API_KEY;
-    const OPENAI_KEY = process.env.i go;
+    const OPENAI_KEY = process.env.OPENAI_API_KEY;
     
     if (!q || typeof q !== 'string') {
       return NextResponse.json({ error: "MISSING_QUERY" }, { status: 400 });
