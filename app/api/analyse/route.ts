@@ -3,6 +3,7 @@ import { YoutubeTranscript } from "youtube-transcript";
 import OpenAI from "openai";
 import { ageFromScores, deriveBullets, makeVerdict, VideoScoreSchema, CATEGORIES } from "@/lib/rating";
 import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments } from "@/lib/youtube";
+import { saveSearchToSupabase } from "@/lib/supabase";
 import type { CategoryKey, PerVideoScore } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -376,9 +377,7 @@ export async function POST(req: NextRequest) {
       const bullets = deriveBullets(aggregateScores);
       const verdict = makeVerdict(ageBand, aggregateScores);
 
-      clearTimeout(timeoutId);
-
-      return NextResponse.json({
+      const analysisResult = {
         query: q,
         channel: channelInfo,
         videos,
@@ -395,7 +394,17 @@ export async function POST(req: NextRequest) {
           percentage: Math.round(transcriptAvailabilityRate * 100),
           sufficient: transcriptAvailabilityRate >= 0.4
         }
+      };
+
+      // Save to Supabase (don't block response on this)
+      const userIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+      saveSearchToSupabase(analysisResult, userIP).catch(error => {
+        console.error('Failed to save to Supabase:', error);
       });
+
+      clearTimeout(timeoutId);
+
+      return NextResponse.json(analysisResult);
 
     } finally {
       clearTimeout(timeoutId);
