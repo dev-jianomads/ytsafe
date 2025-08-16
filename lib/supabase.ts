@@ -1,10 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import type { AnalyseResponse } from '@/types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Only create Supabase client if environment variables are available
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+// Helper function to check if Supabase is available
+export const isSupabaseAvailable = () => {
+  return supabase !== null;
+};
 
 // Types for database tables
 export interface SearchRecord {
@@ -50,6 +58,11 @@ export async function saveSearchToSupabase(
   analysisResult: AnalyseResponse,
   userIP?: string
 ): Promise<string | null> {
+  if (!isSupabaseAvailable()) {
+    console.log('Supabase not configured, skipping save');
+    return null;
+  }
+
   try {
     // Insert search record
     const searchData = {
@@ -113,6 +126,10 @@ export async function saveSearchToSupabase(
 
 // Get recent searches for history
 export async function getRecentSearches(limit: number = 20): Promise<SearchRecord[]> {
+  if (!isSupabaseAvailable()) {
+    return [];
+  }
+
   try {
     const { data, error } = await supabase
       .from('searches')
@@ -134,6 +151,10 @@ export async function getRecentSearches(limit: number = 20): Promise<SearchRecor
 
 // Get search analytics
 export async function getSearchAnalytics() {
+  if (!isSupabaseAvailable()) {
+    return null;
+  }
+
   try {
     const { data: totalSearches, error: totalError } = await supabase
       .from('searches')
@@ -175,6 +196,10 @@ export async function getSearchAnalytics() {
 
 // Get detailed search by ID
 export async function getSearchDetails(searchId: string) {
+  if (!isSupabaseAvailable()) {
+    return null;
+  }
+
   try {
     const { data: search, error: searchError } = await supabase
       .from('searches')

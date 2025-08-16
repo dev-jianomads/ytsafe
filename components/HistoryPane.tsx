@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Clock, X, Database, Wifi, WifiOff } from 'lucide-react';
 import type { HistoryItem } from '@/types';
 import { getHistory, clearHistory } from '@/lib/history';
-import { getRecentSearches, type SearchRecord } from '@/lib/supabase';
+import { getRecentSearches, isSupabaseAvailable, type SearchRecord } from '@/lib/supabase';
 
 interface HistoryPaneProps {
   onSelectItem: (query: string) => void;
@@ -29,7 +29,7 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
     setLocalHistory(local);
     
     // Try to load from Supabase
-    if (useSupabase) {
+    if (useSupabase && isSupabaseAvailable()) {
       try {
         const supabaseData = await getRecentSearches(20);
         setSupabaseHistory(supabaseData);
@@ -37,10 +37,12 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
         console.error('Failed to load Supabase history:', error);
         setUseSupabase(false); // Fall back to local storage
       }
+    } else if (useSupabase && !isSupabaseAvailable()) {
+      // Supabase not configured, fall back to local
+      setUseSupabase(false);
     }
     
     setIsLoading(false);
-  }, [useSupabase]);
 
   useEffect(() => {
     loadHistory();
