@@ -255,6 +255,8 @@ export async function POST(req: NextRequest) {
                 ],
                 temperature: 0.1,
                 max_tokens: 200
+              }
+              )
               
               let commentParsed: any;
               try {
