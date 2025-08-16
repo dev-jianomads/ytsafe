@@ -245,8 +245,9 @@ export async function POST(req: NextRequest) {
               parsed = JSON.parse(jsonString);
             } catch {
               // Retry with explicit formatting instruction
+              let retryCompletion: any = null;
               try {
-                const retryCompletion = await openai.chat.completions.create({
+                retryCompletion = await openai.chat.completions.create({
                   model: "gpt-4o-mini",
                   messages: [
                     { role: "system", content: SYSTEM_PROMPT + " CRITICAL: Return ONLY valid JSON, no other text." },
@@ -273,7 +274,7 @@ export async function POST(req: NextRequest) {
               } catch (retryError) {
                 console.error(`JSON parsing failed for video ${videoId}:`, {
                   originalResponse: responseText,
-                  retryResponse: retryCompletion.choices[0]?.message?.content || 'No retry response',
+                  retryResponse: retryCompletion?.choices[0]?.message?.content || 'No retry response',
                   error: retryError
                 });
               }
