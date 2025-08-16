@@ -237,36 +237,63 @@ export async function POST(req: NextRequest) {
           }
 
           const responseText = completion.choices[0]?.message?.content ?? "{}";
-          let parsed: any;
+          let parsed: any = null;
           
           try {
-            parsed = JSON.parse(responseText);
+            // Try to extract JSON from response (in case there's extra text)
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            const jsonString = jsonMatch ? jsonMatch[0] : responseText;
+            parsed = JSON.parse(jsonString);
           } catch {
             // Retry with explicit formatting instruction
-            const retryCompletion = await openai.chat.completions.create({
-              model: "gpt-4o-mini",
-              messages: [
-                { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content: bundle },
-                { role: "assistant", content: responseText },
-                { role: "user", content: "Please format strictly as JSON with the required fields." }
-              ],
-              temperature: 0.1,
-              max_tokens: 200
-            });
-            
-            // Log retry token usage
-            const retryUsage = retryCompletion.usage;
-            if (retryUsage) {
-              console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
-                prompt_tokens: retryUsage.prompt_tokens,
-                completion_tokens: retryUsage.completion_tokens,
-                total_tokens: retryUsage.total_tokens
+            try {
+              const retryCompletion = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                  { role: "system", content: COMMENT_ANALYSIS_PROMPT + " CRITICAL: Return ONLY valid JSON, no other text." },
+                  { role: "user", content: bundle }
+                ],
+                temperature: 0.1,
+                max_tokens: 200
+              
+              let commentParsed: any;
+              try {
+                const commentJsonMatch = commentResponseText.match(/\{[\s\S]*\}/);
+                const commentJsonString = commentJsonMatch ? commentJsonMatch[0] : commentResponseText;
+                commentParsed = JSON.parse(commentJsonString);
+              } catch (parseError) {
+                console.warn(`Comment analysis JSON parsing failed for video ${videoId}:`, {
+                  response: commentResponseText,
+                  error: parseError
+                });
+                commentParsed = { avgSentiment: 'neutral', communityFlags: [] };
+              }
+              
+              // Log retry token usage
+              const retryUsage = retryCompletion.usage;
+              if (retryUsage) {
+                console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
+                  prompt_tokens: retryUsage.prompt_tokens,
+                  completion_tokens: retryUsage.completion_tokens,
+                  total_tokens: retryUsage.total_tokens
+                });
+              }
+
+              const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
+              const retryJsonMatch = retryText.match(/\{[\s\S]*\}/);
+              const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
+              parsed = JSON.parse(retryJsonString);
+            } catch (retryError) {
+              console.error(`JSON parsing failed for video ${videoId}:`, {
+                originalResponse: responseText,
+                retryResponse: retryText || 'No retry response',
+                error: retryError
+              });
+              console.warn(`Comment analysis failed for video ${videoId}:`, {
+                error: error instanceof Error ? error.message : 'Unknown error',
+                commentCount: comments.length
               });
             }
-
-            const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
-            parsed = JSON.parse(retryText);
           }
 
           // Validate and sanitize scores
@@ -281,11 +308,17 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           // Fallback to conservative defaults
+          console.error(`OpenAI analysis failed for video ${videoId}:`, {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            videoTitle: video.snippet?.title,
+            bundleLength: bundle.length
+          });
+          
           categoryScores = Object.fromEntries(
             CATEGORIES.map(k => [k, 1])
           ) as Record<CategoryKey, 0|1|2|3|4>;
           riskNote = "analysis failed";
-          warnings.push(`Classification failed for video ${videoId}: ${error instanceof Error ? error.message : 'Unknown error'}. Using conservative fallback ratings.`);
+          warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
         }
 
         const maxScore = Math.max(...Object.values(categoryScores));
