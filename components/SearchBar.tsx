@@ -37,6 +37,21 @@ export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHis
         <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Kid-Safety Rater</h1>
       </div>
 
+      {/* ESRB Description */}
+      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-sm text-gray-700 leading-relaxed">
+          <a 
+            href="https://www.esrb.org" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-medium text-blue-600 hover:text-blue-800 underline"
+          >
+            ESRB ratings
+          </a>{' '}
+          provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
