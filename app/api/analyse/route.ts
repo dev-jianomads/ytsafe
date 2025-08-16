@@ -92,6 +92,17 @@ export async function POST(req: NextRequest) {
             max_tokens: 200
           });
 
+          // Log token usage
+          const usage = completion.usage;
+          if (usage) {
+            console.log(`OpenAI Token Usage for video ${videoId}:`, {
+              prompt_tokens: usage.prompt_tokens,
+              completion_tokens: usage.completion_tokens,
+              total_tokens: usage.total_tokens,
+              bundle_length: bundle.length
+            });
+          }
+
           const responseText = completion.choices[0]?.message?.content ?? "{}";
           let parsed: any;
           
@@ -111,6 +122,16 @@ export async function POST(req: NextRequest) {
               max_tokens: 200
             });
             
+            // Log retry token usage
+            const retryUsage = retryCompletion.usage;
+            if (retryUsage) {
+              console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
+                prompt_tokens: retryUsage.prompt_tokens,
+                completion_tokens: retryUsage.completion_tokens,
+                total_tokens: retryUsage.total_tokens
+              });
+            }
+
             const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
             parsed = JSON.parse(retryText);
           }
