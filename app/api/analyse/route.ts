@@ -122,6 +122,8 @@ export async function POST(req: NextRequest) {
       // Process videos in parallel batches
       for (const batch of videoBatches) {
         const batchPromises = batch.map(async (video) => {
+        }
+        )
         const videoId = video.id;
         const viewCount = Number(video.statistics?.viewCount ?? 0);
         const likeCount = Number(video.statistics?.likeCount ?? 0);
@@ -222,8 +224,19 @@ export async function POST(req: NextRequest) {
               { role: "user", content: bundle }
             ],
             temperature: 0.2,
-            max_tokens: 150 // Reduced token usage
+            max_tokens: 200
           });
+
+          // Log token usage
+          const usage = completion.usage;
+          if (usage) {
+            console.log(`OpenAI Token Usage for video ${videoId}:`, {
+              prompt_tokens: usage.prompt_tokens,
+              completion_tokens: usage.completion_tokens,
+              total_tokens: usage.total_tokens,
+              bundle_length: bundle.length
+            });
+          }
 
           const responseText = completion.choices[0]?.message?.content ?? "{}";
           let parsed: any = null;
@@ -234,9 +247,57 @@ export async function POST(req: NextRequest) {
             const jsonString = jsonMatch ? jsonMatch[0] : responseText;
             parsed = JSON.parse(jsonString);
           } catch {
-            // Skip retry to save time - use fallback immediately
-            console.warn(`JSON parsing failed for video ${videoId}, using fallback`);
-            throw new Error("JSON parsing failed");
+            // Retry with explicit formatting instruction
+            try {
+              const retryCompletion = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                  { role: "system", content: COMMENT_ANALYSIS_PROMPT + " CRITICAL: Return ONLY valid JSON, no other text." },
+                  { role: "user", content: bundle }
+                ],
+                temperature: 0.1,
+                max_tokens: 200
+              }
+              )
+              
+              let commentParsed: any;
+              try {
+                const commentJsonMatch = commentResponseText.match(/\{[\s\S]*\}/);
+                const commentJsonString = commentJsonMatch ? commentJsonMatch[0] : commentResponseText;
+                commentParsed = JSON.parse(commentJsonString);
+              } catch (parseError) {
+                console.warn(`Comment analysis JSON parsing failed for video ${videoId}:`, {
+                  response: commentResponseText,
+                  error: parseError
+                });
+                commentParsed = { avgSentiment: 'neutral', communityFlags: [] };
+              }
+              
+              // Log retry token usage
+              const retryUsage = retryCompletion.usage;
+              if (retryUsage) {
+                console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
+                  prompt_tokens: retryUsage.prompt_tokens,
+                  completion_tokens: retryUsage.completion_tokens,
+                  total_tokens: retryUsage.total_tokens
+                });
+              }
+
+              const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
+              const retryJsonMatch = retryText.match(/\{[\s\S]*\}/);
+              const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
+              parsed = JSON.parse(retryJsonString);
+            } catch (retryError) {
+              console.error(`JSON parsing failed for video ${videoId}:`, {
+                originalResponse: responseText,
+                retryResponse: retryText || 'No retry response',
+                error: retryError
+              });
+              console.warn(`Comment analysis failed for video ${videoId}:`, {
+                error: error instanceof Error ? error.message : 'Unknown error',
+                commentCount: comments.length
+              });
+            }
           }
 
           // Validate and sanitize scores
@@ -254,6 +315,7 @@ export async function POST(req: NextRequest) {
           console.error(`OpenAI analysis failed for video ${videoId}:`, {
             error: error instanceof Error ? error.message : 'Unknown error',
             videoTitle: video.snippet?.title,
+            bundleLength: bundle.length
           });
           
           categoryScores = Object.fromEntries(
@@ -269,7 +331,7 @@ export async function POST(req: NextRequest) {
                     maxScore === 2 ? "moderate content" : "mild content";
         }
 
-        return {
+        videos.push({
           videoId,
           url: `https://www.youtube.com/watch?v=${videoId}`,
           title: video.snippet?.title ?? "Untitled",
@@ -281,15 +343,6 @@ export async function POST(req: NextRequest) {
           categoryScores,
           riskNote: riskNote.slice(0, 64),
           commentAnalysis
-        };
-        });
-
-        // Wait for batch to complete
-        const batchResults = await Promise.allSettled(batchPromises);
-        batchResults.forEach(result => {
-          if (result.status === 'fulfilled') {
-            videos.push(result.value);
-          }
         });
       }
 
