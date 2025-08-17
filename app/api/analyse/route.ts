@@ -463,11 +463,11 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get('user-agent') || undefined;
     
     if (error.name === 'AbortError') {
-      await trackFailedAnalysis(parsedQuery || 'unknown', 'TIMEOUT', sessionId, userAgent);
+      await trackFailedAnalysis(parsedQuery, 'TIMEOUT', sessionId, userAgent);
       return NextResponse.json({ error: "TIMEOUT" }, { status: 408 });
     }
     
-    await trackFailedAnalysis(parsedQuery || 'unknown', 'ANALYSIS_FAILED', sessionId, userAgent);
+    await trackFailedAnalysis(parsedQuery, 'ANALYSIS_FAILED', sessionId, userAgent);
     return NextResponse.json({ 
       error: "ANALYSIS_FAILED", 
       detail: error?.message ?? String(error) 
