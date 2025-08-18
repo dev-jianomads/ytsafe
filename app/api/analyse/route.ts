@@ -462,6 +462,12 @@ export async function POST(req: NextRequest) {
     const sessionId = generateSessionId();
     const userAgent = req.headers.get('user-agent') || undefined;
     
+    console.log('Tracking failed analysis:', {
+      query: parsedQuery,
+      error: error?.message,
+      sessionId
+    });
+    
     if (error.name === 'AbortError') {
       await trackFailedAnalysis(parsedQuery, 'TIMEOUT', sessionId, userAgent);
       return NextResponse.json({ error: "TIMEOUT" }, { status: 408 });
