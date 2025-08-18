@@ -150,14 +150,9 @@ export default function Home() {
             )}
 
             {!results && !error && !isLoading && (
-              <Card className="p-8 sm:p-12 text-center">
-                <Heart className="h-16 w-16 text-pink-300 mx-auto mb-4" />
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
-                  Ready to Analyse YouTube Content
-                </h3>
-                
+              <Card className="p-8 sm:p-12">
                 {/* How It Works Section */}
-                <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200 text-left max-w-2xl mx-auto">
+                <div className="p-6 bg-blue-50 rounded-lg border border-blue-200 text-left max-w-2xl mx-auto">
                   <h4 className="text-lg font-semibold text-blue-900 mb-4 text-center">How Our Safety Analysis Works</h4>
                   
                   <div className="space-y-4 text-sm text-blue-800">
