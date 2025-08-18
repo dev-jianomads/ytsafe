@@ -447,6 +447,8 @@ export async function POST(req: NextRequest) {
           openai_requests_count: openaiRequestsCount
         }
       );
+      
+      console.log('🎯 Analysis completed, analytics tracking attempted');
 
       clearTimeout(timeoutId);
 
@@ -462,7 +464,7 @@ export async function POST(req: NextRequest) {
     const sessionId = generateSessionId();
     const userAgent = req.headers.get('user-agent') || undefined;
     
-    console.log('Tracking failed analysis:', {
+    console.log('❌ Tracking failed analysis:', {
       query: parsedQuery,
       error: error?.message,
       sessionId

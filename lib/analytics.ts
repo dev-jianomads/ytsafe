@@ -4,6 +4,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+console.log('🔧 Analytics module loading...', {
+  hasUrl: !!supabaseUrl,
+  hasServiceKey: !!supabaseServiceKey,
+  urlPreview: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'missing',
+  keyPreview: supabaseServiceKey ? `${supabaseServiceKey.substring(0, 10)}...` : 'missing'
+});
+
 let supabase: any = null;
 
 // Only initialize if we have the required environment variables
@@ -116,34 +123,42 @@ export function calculateEngagementStats(videos: any[]) {
 export async function saveAnalytics(data: AnalyticsData): Promise<void> {
   // Skip if Supabase is not configured
   if (!supabase) {
-    console.warn('Supabase not configured for analytics - skipping save');
+    console.warn('❌ Supabase not configured for analytics - skipping save', {
+      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    });
     return;
   }
 
   try {
-    console.log('Attempting to save analytics data:', {
+    console.log('📊 Attempting to save analytics data:', {
       query: data.query,
       query_type: data.query_type,
       analysis_success: data.analysis_success,
-      session_id: data.session_id
+      session_id: data.session_id,
+      video_count: data.video_count,
+      age_band: data.age_band
     });
+
+    console.log('📝 Full analytics payload:', JSON.stringify(data, null, 2));
 
     const { error } = await supabase
       .from('search_analytics')
       .insert([data]);
 
     if (error) {
-      console.error('Failed to save analytics to Supabase:', {
+      console.error('❌ Failed to save analytics to Supabase:', {
         error: error.message,
         code: error.code,
         details: error.details,
-        hint: error.hint
+        hint: error.hint,
+        payload: data
       });
     } else {
-      console.log('Analytics saved successfully to Supabase');
+      console.log('✅ Analytics saved successfully to Supabase!');
     }
   } catch (error) {
-    console.error('Unexpected error saving analytics:', error);
+    console.error('💥 Unexpected error saving analytics:', error);
   }
 }
 
