@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getCurrentSessionId } from './session';
 
 // Initialize Supabase client for analytics
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -47,11 +48,6 @@ export interface AnalyticsData {
   total_completion_tokens: number;
   total_tokens: number;
   openai_requests_count: number;
-}
-
-// Generate anonymous session ID
-export function generateSessionId(): string {
-  return 'sess_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 
 // Hash user agent for privacy-preserving demographics
@@ -166,7 +162,6 @@ export async function saveAnalytics(data: AnalyticsData): Promise<void> {
 export async function trackSuccessfulAnalysis(
   query: string,
   results: any,
-  sessionId: string,
   userAgent?: string,
   tokenUsage?: {
     total_prompt_tokens: number;
@@ -176,6 +171,7 @@ export async function trackSuccessfulAnalysis(
   }
 ) {
   const engagementStats = calculateEngagementStats(results.videos || []);
+  const sessionId = getCurrentSessionId();
   
   const analyticsData: AnalyticsData = {
     query,
@@ -201,7 +197,6 @@ export async function trackSuccessfulAnalysis(
 export async function trackFailedAnalysis(
   query: string,
   errorType: string,
-  sessionId: string,
   userAgent?: string,
   tokenUsage?: {
     total_prompt_tokens: number;
@@ -210,6 +205,8 @@ export async function trackFailedAnalysis(
     openai_requests_count: number;
   }
 ) {
+  const sessionId = getCurrentSessionId();
+  
   const analyticsData: AnalyticsData = {
     query,
     query_type: getQueryType(query),

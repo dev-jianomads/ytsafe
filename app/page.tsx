@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { HistoryPane } from '@/components/HistoryPane';
+import { FeedbackModal } from '@/components/FeedbackModal';
 import { SummaryCard } from '@/components/SummaryCard';
 import { CategoryTable } from '@/components/CategoryTable';
 import { VideoList } from '@/components/VideoList';
@@ -11,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Heart } from 'lucide-react';
 import type { AnalyseResponse, HistoryItem } from '@/types';
 import { saveToHistory } from '@/lib/history';
+import { incrementSearchCount } from '@/lib/session';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +22,8 @@ export default function Home() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [shouldClearSearch, setShouldClearSearch] = useState(false);
   const [historyKey, setHistoryKey] = useState(0); // Force history refresh
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSessionId, setFeedbackSessionId] = useState('');
 
   const handleAnalyse = async (searchQuery: string) => {
     setIsLoading(true);
@@ -47,6 +51,13 @@ export default function Home() {
       saveToHistory(searchQuery, data.aggregate.ageBand, data.aggregate.verdict);
       setHistoryKey(prev => prev + 1); // Trigger history refresh
       setShouldClearSearch(true);
+      
+      // Check if we should show feedback after successful search
+      const { shouldShowFeedback, sessionId } = incrementSearchCount();
+      if (shouldShowFeedback) {
+        setFeedbackSessionId(sessionId);
+        setShowFeedback(true);
+      }
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -247,6 +258,13 @@ export default function Home() {
           </div>
         </div>
       </div>
+      
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+        sessionId={feedbackSessionId}
+      />
     </div>
   );
 }
