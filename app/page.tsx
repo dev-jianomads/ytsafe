@@ -155,29 +155,10 @@ export default function Home() {
                 <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                   Ready to Analyse YouTube Content
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
-                  Paste a YouTube channel URL, video URL, or handle above to get an ESRB-style safety rating 
-                  for family-friendly content evaluation.
-                </p>
                 
                 {/* How It Works Section */}
                 <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200 text-left max-w-2xl mx-auto">
                   <h4 className="text-lg font-semibold text-blue-900 mb-4 text-center">How Our Safety Analysis Works</h4>
-                  
-                  {/* ESRB Description merged in */}
-                  <div className="mb-6 p-4 bg-white rounded-lg border border-blue-100">
-                    <p className="text-sm text-blue-800 leading-relaxed">
-                      <a 
-                        href="https://www.esrb.org" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:text-blue-800 underline"
-                      >
-                        ESRB ratings
-                      </a>{' '}
-                      provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family. We apply the same principles to YouTube content.
-                    </p>
-                  </div>
                   
                   <div className="space-y-4 text-sm text-blue-800">
                     <div className="flex items-start gap-3">
@@ -216,12 +197,35 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="font-medium mb-1">We focus on recent videos</p>
-                        <p className="text-blue-700">Channels change over time. We analyze the 10 most recent videos to give you current safety information, not outdated ratings.</p>
+                        <p className="text-blue-700">Channels change over time. We analyze the 8 most recent videos to give you current safety information, not outdated ratings.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-blue-700">5</span>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1">💡 Parent Tip</p>
+                        <p className="text-blue-700 font-medium">Always preview content yourself and consider your child's individual maturity level alongside these ratings.</p>
                       </div>
                     </div>
                   </div>
                   
+                  {/* ESRB Description and Rating Categories merged */}
                   <div className="mt-6 p-4 bg-white rounded-lg border border-blue-100">
+                    <p className="text-sm text-blue-800 leading-relaxed mb-4">
+                      <a 
+                        href="https://www.esrb.org" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="font-medium text-blue-600 hover:text-blue-800 underline"
+                      >
+                        ESRB ratings
+                      </a>{' '}
+                      provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family.
+                    </p>
+                    
                     <h5 className="font-semibold text-blue-900 mb-2">Rating Categories (Just Like Video Games)</h5>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="flex items-center gap-2">
@@ -242,10 +246,6 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  
-                  <p className="text-xs text-blue-600 mt-4 text-center italic">
-                    💡 <strong>Parent Tip:</strong> Always preview content yourself and consider your child's individual maturity level alongside these ratings.
-                  </p>
                 </div>
               </Card>
             )}
