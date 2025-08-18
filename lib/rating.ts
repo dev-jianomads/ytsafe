@@ -3,7 +3,7 @@ import { CategoryKey } from '@/types';
 
 export const CATEGORIES: CategoryKey[] = [
   "violence", "language", "sexual_content", 
-  "substances", "sensitive_topics", "commercial_pressure"
+  "substances", "gambling", "sensitive_topics", "commercial_pressure"
 ];
 
 export function ageFromScores(scores: Record<CategoryKey, number>): "E" | "E10+" | "T" | "16+" {
@@ -20,6 +20,7 @@ export function deriveBullets(scores: Record<CategoryKey, number>): string[] {
     language: "language", 
     sexual_content: "sexual content",
     substances: "alcohol/drugs",
+    gambling: "gambling",
     sensitive_topics: "sensitive topics",
     commercial_pressure: "sponsorship/ads"
   };
@@ -49,6 +50,7 @@ export function makeVerdict(ageBand: string, scores: Record<CategoryKey, number>
     language: "due to language",
     sexual_content: "due to suggestive themes",
     substances: "due to alcohol/drugs",
+    gambling: "due to gambling content",
     sensitive_topics: "due to sensitive topics",
     commercial_pressure: "due to heavy sponsorship"
   };
@@ -61,6 +63,7 @@ export const VideoScoreSchema = z.object({
   language: z.number().min(0).max(4),
   sexual_content: z.number().min(0).max(4),
   substances: z.number().min(0).max(4),
+  gambling: z.number().min(0).max(4),
   sensitive_topics: z.number().min(0).max(4),
   commercial_pressure: z.number().min(0).max(4),
   riskNote: z.string().max(64)

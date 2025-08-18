@@ -1,6 +1,6 @@
 export type CategoryKey =
   | "violence" | "language" | "sexual_content"
-  | "substances" | "sensitive_topics" | "commercial_pressure";
+  | "substances" | "gambling" | "sensitive_topics" | "commercial_pressure";
 
 export type PerVideoScore = {
   videoId: string;

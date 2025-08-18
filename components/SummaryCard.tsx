@@ -50,6 +50,7 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
     language: "Language",
     sexual_content: "Sexual Content",
     substances: "Substances",
+    gambling: "Gambling",
     sensitive_topics: "Sensitive Topics",
     commercial_pressure: "Commercial Pressure"
   };
