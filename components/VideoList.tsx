@@ -71,11 +71,11 @@ export function VideoList({ videos }: VideoListProps) {
                     href={video.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm sm:text-base font-medium text-gray-900 hover:text-blue-600 line-clamp-2 sm:line-clamp-1 block"
+                    className="text-sm sm:text-base font-medium text-blue-600 hover:text-blue-800 hover:underline line-clamp-2 sm:line-clamp-1 block transition-colors duration-200 cursor-pointer"
                   >
                     {video.title}
+                    <ExternalLink className="h-3 w-3 text-blue-500 inline ml-1 align-top" />
                   </a>
-                  <ExternalLink className="h-3 w-3 text-gray-400 inline ml-1" />
                 </div>
                 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">

@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AlertTriangle, Share } from 'lucide-react';
+import { AlertTriangle, Share, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Aggregate } from '@/types';
 
@@ -135,21 +135,56 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
     }
   };
 
+  const handleViewChannel = () => {
+    if (channel?.handle) {
+      // Create YouTube channel URL from handle
+      const channelUrl = `https://www.youtube.com/${channel.handle}`;
+      
+      // Detect mobile devices
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Try to open in YouTube app first, fallback to web
+        window.location.href = `youtube://channel/${channel.handle.replace('@', '')}`;
+        setTimeout(() => {
+          window.open(channelUrl, '_blank');
+        }, 500);
+      } else {
+        // Desktop: open in new tab
+        window.open(channelUrl, '_blank');
+      }
+    }
+  };
+
   return (
     <Card className="p-4 sm:p-6 mb-6">
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start gap-3 mb-4">
         <div className="flex-1 min-w-0">
           {/* Existing content will go here */}
         </div>
-        <Button
-          onClick={handleShare}
-          variant="outline"
-          size="sm"
-          className="ml-4 flex-shrink-0 gap-2"
-        >
-          <Share className="h-4 w-4" />
-          Share
-        </Button>
+        <div className="flex gap-2 flex-shrink-0">
+          {channel?.handle && (
+            <Button
+              onClick={handleViewChannel}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">View Channel</span>
+              <span className="sm:hidden">Channel</span>
+            </Button>
+          )}
+          <Button
+            onClick={handleShare}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <Share className="h-4 w-4" />
+            <span className="hidden sm:inline">Share</span>
+          </Button>
+        </div>
       </div>
       
       <div className="flex flex-col sm:flex-row items-start gap-4">

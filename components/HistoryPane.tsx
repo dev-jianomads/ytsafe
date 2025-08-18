@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Clock, X } from 'lucide-react';
+import { Trash2, Clock, X, RefreshCw, ExternalLink } from 'lucide-react';
 import type { HistoryItem } from '@/types';
 import { getHistory, clearHistory } from '@/lib/history';
 
