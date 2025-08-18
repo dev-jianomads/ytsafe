@@ -8,7 +8,7 @@ import { CategoryTable } from '@/components/CategoryTable';
 import { VideoList } from '@/components/VideoList';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Shield } from 'lucide-react';
+import { AlertTriangle, Heart } from 'lucide-react';
 import type { AnalyseResponse, HistoryItem } from '@/types';
 import { saveToHistory } from '@/lib/history';
 
@@ -93,7 +93,7 @@ export default function Home() {
           {/* Header */}
           <div className="hidden lg:block bg-white border-b px-6 py-4">
             <div className="flex items-center gap-3">
-              <Shield className="h-8 w-8 text-blue-600" />
+              <Heart className="h-8 w-8 text-pink-500" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">YouTube Children-Safety Reviewer</h1>
                 <p className="text-sm text-gray-600">ESRB-style content analysis for family-friendly viewing</p>
@@ -151,7 +151,7 @@ export default function Home() {
 
             {!results && !error && !isLoading && (
               <Card className="p-8 sm:p-12 text-center">
-                <Shield className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <Heart className="h-16 w-16 text-pink-300 mx-auto mb-4" />
                 <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                   Ready to Analyse YouTube Content
                 </h3>
@@ -163,6 +163,21 @@ export default function Home() {
                 {/* How It Works Section */}
                 <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200 text-left max-w-2xl mx-auto">
                   <h4 className="text-lg font-semibold text-blue-900 mb-4 text-center">How Our Safety Analysis Works</h4>
+                  
+                  {/* ESRB Description merged in */}
+                  <div className="mb-6 p-4 bg-white rounded-lg border border-blue-100">
+                    <p className="text-sm text-blue-800 leading-relaxed">
+                      <a 
+                        href="https://www.esrb.org" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="font-medium text-blue-600 hover:text-blue-800 underline"
+                      >
+                        ESRB ratings
+                      </a>{' '}
+                      provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family. We apply the same principles to YouTube content.
+                    </p>
+                  </div>
                   
                   <div className="space-y-4 text-sm text-blue-800">
                     <div className="flex items-start gap-3">

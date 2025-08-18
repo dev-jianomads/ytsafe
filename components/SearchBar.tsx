@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, Menu } from 'lucide-react';
+import { Loader2, Search, Menu, Sparkles } from 'lucide-react';
 
 interface SearchBarProps {
   onAnalyse: (query: string) => void;
@@ -45,19 +45,13 @@ export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHis
         <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Children-Safety Reviewer</h1>
       </div>
 
-      {/* ESRB Description */}
-      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-        <p className="text-sm text-gray-700 leading-relaxed">
-          <a 
-            href="https://www.esrb.org" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="font-medium text-blue-600 hover:text-blue-800 underline"
-          >
-            ESRB ratings
-          </a>{' '}
-          provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family.
-        </p>
+      {/* Promotional Banner */}
+      <div className="mb-4 flex justify-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full text-sm font-medium shadow-lg">
+          <Sparkles className="h-4 w-4" />
+          <span className="hidden sm:inline">Free and no sign-in required - just copy and paste YouTube URL or @handle</span>
+          <span className="sm:hidden">Free - no sign-in required</span>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
