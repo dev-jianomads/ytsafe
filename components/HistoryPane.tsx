@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Clock, X, RefreshCw, ExternalLink } from 'lucide-react';
+import { Trash2, Clock, X } from 'lucide-react';
 import type { HistoryItem } from '@/types';
 import { getHistory, clearHistory } from '@/lib/history';
 
@@ -130,23 +130,50 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
             {history.slice(0, 20).map((item, index) => (
               <Card 
                 key={`${item.q}-${item.ts}-${index}`}
-                className="p-3 cursor-pointer hover:shadow-md transition-shadow"
+                className="p-3 cursor-pointer hover:shadow-md transition-shadow relative group"
                 onClick={() => {
                   onSelectItem(item.q);
                   onClose();
                 }}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs font-medium ${getAgeBadgeColor(item.ageBand)}`}
-                  >
-                    {item.ageBand}
-                  </Badge>
-                  <span className="text-xs text-gray-500">
-                    {formatTimestamp(item.ts)}
-                  </span>
+                <div className="flex items-start justify-between mb-2 pr-16">
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs font-medium ${getAgeBadgeColor(item.ageBand)}`}
+                    >
+                      {item.ageBand}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">
+                      {formatTimestamp(item.ts)}
+                    </span>
+                  </div>
                 </div>
+                
+                {/* Action buttons - positioned absolutely */}
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-blue-100"
+                    onClick={(e) => handleRefreshAnalysis(item.q, e)}
+                    title="Refresh analysis"
+                  >
+                    <RefreshCw className="h-3 w-3 text-blue-600" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-red-100"
+                    onClick={(e) => handleViewChannel(item.q, e)}
+                    title="View on YouTube"
+                  >
+                    <ExternalLink className="h-3 w-3 text-red-600" />
+                  </Button>
+                </div>
+                
                 <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
                   {item.q}
                 </p>
