@@ -111,10 +111,11 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
         fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
         w-80 lg:w-80 bg-gray-50 border-r min-h-screen p-4
         transform transition-transform duration-300 ease-in-out lg:transform-none
+        flex flex-col
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Mobile close button */}
-        <div className="flex items-center justify-between mb-4 lg:hidden">
+        <div className="flex items-center justify-between mb-4 lg:hidden flex-shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">Search History</h2>
           <Button 
             variant="ghost" 
@@ -126,7 +127,7 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
           </Button>
         </div>
 
-        <div className="hidden lg:flex items-center justify-between mb-4">
+        <div className="hidden lg:flex items-center justify-between mb-4 flex-shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">Search History</h2>
           {history.length > 0 && (
             <Button 
@@ -142,7 +143,7 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
 
         {/* Clear button for mobile */}
         {history.length > 0 && (
-          <div className="mb-4 lg:hidden">
+          <div className="mb-4 lg:hidden flex-shrink-0">
             <Button 
               variant="outline" 
               size="sm" 
@@ -155,6 +156,8 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
           </div>
         )}
 
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto min-h-0">
         {history.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -219,6 +222,7 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
             ))}
           </div>
         )}
+        </div>
       </div>
     </>
   );
