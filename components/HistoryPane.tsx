@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Clock, X } from 'lucide-react';
+import { Trash2, Clock, X, RefreshCw, ExternalLink } from 'lucide-react';
 import type { HistoryItem } from '@/types';
 import { getHistory, clearHistory } from '@/lib/history';
 
@@ -36,6 +36,41 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
   const handleClearHistory = () => {
     clearHistory();
     setHistory([]);
+  };
+
+  const handleRefreshAnalysis = (query: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelectItem(query);
+    onClose();
+  };
+
+  const handleViewChannel = (query: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    let url = '';
+    if (query.startsWith('@')) {
+      url = `https://www.youtube.com/${query}`;
+    } else if (query.includes('youtube.com/channel/') || query.includes('youtube.com/c/') || query.includes('youtube.com/@')) {
+      url = query;
+    } else if (query.includes('youtube.com/watch?v=')) {
+      url = query;
+    } else {
+      url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    }
+    
+    // Smart link behavior: mobile vs desktop
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Try to open in YouTube app first, fallback to browser
+      const youtubeAppUrl = url.replace('https://www.youtube.com', 'youtube://');
+      window.location.href = youtubeAppUrl;
+      setTimeout(() => {
+        window.open(url, '_blank');
+      }, 500);
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   const getAgeBadgeColor = (ageBand: string) => {
