@@ -138,8 +138,9 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
 
   const handleViewChannel = () => {
     if (channel?.handle) {
-      // Use official YouTube URL format
-      const channelUrl = `https://www.youtube.com/${channel.handle}`;
+      // Clean the handle - remove existing @ if present, then add our own
+      const cleanHandle = channel.handle.startsWith('@') ? channel.handle : `@${channel.handle}`;
+      const channelUrl = `https://www.youtube.com/${cleanHandle}`;
       
       // Detect mobile devices
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -221,15 +222,6 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
             >
               {aggregate.ageBand}
             </Badge>
-            {transcriptCoverage && !transcriptCoverage.sufficient && (
-              <Badge 
-                variant="outline" 
-                className="text-xs bg-amber-50 text-amber-700 border-amber-200 self-start flex items-center gap-1"
-              >
-                <AlertTriangle className="h-3 w-3" />
-                Limited Analysis ({transcriptCoverage.percentage}% transcripts)
-              </Badge>
-            )}
             {channel?.title && (
               <div className="hidden sm:block">
                 <h3 className="font-semibold text-gray-900">{channel.title}</h3>
@@ -256,13 +248,6 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
             </ul>
           </div>
         </div>
-      </div>
-      
-      {/* Parent Tip */}
-      <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-        <p className="text-sm text-green-800">
-          <span className="font-semibold">💡 Parent Tip:</span> Always preview content yourself and consider your child's maturity level. We've made it easy - click any video title or use the "View Channel" button to go straight to YouTube.
-        </p>
       </div>
     </Card>
   );

@@ -150,6 +150,13 @@ export default function Home() {
                 
                 <CategoryTable scores={results.aggregate.scores} />
                 
+                {/* Parent Tip */}
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-800">
+                    <span className="font-semibold">💡 Parent Tip:</span> Always preview content yourself and consider your child's maturity level. We've made it easy - click any video title or use the "View Channel" button to go straight to YouTube.
+                  </p>
+                </div>
+                
                 <VideoList videos={results.videos} />
                 
                 {/* Move warnings after the dashboard */}
