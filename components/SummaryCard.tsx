@@ -138,8 +138,8 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
 
   const handleViewChannel = () => {
     if (channel?.handle) {
-      // Clean the handle - remove existing @ if present, then add our own
-      const cleanHandle = channel.handle.startsWith('@') ? channel.handle : `@${channel.handle}`;
+      // Clean the handle - remove any existing @ symbols, then add our own
+      const cleanHandle = channel.handle.replace(/^@+/, '');
       const channelUrl = `https://www.youtube.com/${cleanHandle}`;
       
       // Detect mobile devices

@@ -70,10 +70,11 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
         <Button 
           type="submit" 
           disabled={!query.trim() || isLoading}
-          className="min-w-[100px] w-full sm:w-auto"
+          className="min-w-[100px] w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
         >
           {isLoading ? (
-            <span className="text-sm">
+            <span className="text-sm flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               {loadingMessage || 'Processing...'}
             </span>
           ) : (
@@ -84,16 +85,6 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
           )}
         </Button>
       </form>
-      
-      {/* Loading message display */}
-      {isLoading && loadingMessage && (
-        <div className="mt-3 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm">
-            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            {loadingMessage}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
