@@ -27,6 +27,7 @@ export interface FeedbackData {
   session_id: string;
   score: number;
   comment?: string;
+  user_agent_hash?: string;
 }
 
 // Save feedback to Supabase
@@ -46,6 +47,7 @@ export async function saveFeedback(data: FeedbackData): Promise<boolean> {
       score: data.score,
       hasComment: !!data.comment,
       commentLength: data.comment?.length || 0,
+      user_agent_hash: data.user_agent_hash,
       supabaseUrl: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'missing',
       supabaseAnonKey: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 10)}...` : 'missing'
     });
@@ -73,7 +75,8 @@ export async function saveFeedback(data: FeedbackData): Promise<boolean> {
     } else {
       console.log('✅ Feedback saved successfully to Supabase!', {
         session_id: data.session_id,
-        score: data.score
+        score: data.score,
+        user_agent_hash: data.user_agent_hash
       });
       return true;
     }

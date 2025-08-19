@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { X, Star, MessageSquare } from 'lucide-react';
 import { saveFeedback } from '@/lib/feedback';
 import { markFeedbackShown } from '@/lib/session';
+import { hashUserAgent } from '@/lib/analytics';
 import { toast } from 'sonner';
 
 interface FeedbackModalProps {
@@ -33,17 +34,23 @@ export function FeedbackModal({ isOpen, onClose, sessionId }: FeedbackModalProps
 
     setIsSubmitting(true);
     
+    // Get user agent hash for user identification
+    const userAgent = navigator.userAgent;
+    const userAgentHash = hashUserAgent(userAgent);
+    
     console.log('🎯 Submitting feedback:', {
       sessionId,
       score,
-      comment: comment.trim() || undefined
+      comment: comment.trim() || undefined,
+      userAgentHash
     });
 
     try {
       const feedbackData = {
         session_id: sessionId,
         score,
-        comment: comment.trim() || undefined
+        comment: comment.trim() || undefined,
+        user_agent_hash: userAgentHash
       };
 
       const success = await saveFeedback(feedbackData);
