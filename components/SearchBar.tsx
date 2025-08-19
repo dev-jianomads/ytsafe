@@ -26,8 +26,9 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim() && !isLoading) {
-      onAnalyse(query.trim());
+    const trimmedQuery = query.trim();
+    if (trimmedQuery && !isLoading) {
+      onAnalyse(trimmedQuery);
     }
   };
 
