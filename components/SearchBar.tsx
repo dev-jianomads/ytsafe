@@ -3,17 +3,18 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search, Menu, Sparkles } from 'lucide-react';
+import { Search, Menu, Sparkles } from 'lucide-react';
 
 interface SearchBarProps {
   onAnalyse: (query: string) => void;
   isLoading: boolean;
+  loadingMessage?: string;
   initialQuery?: string;
   onToggleHistory: () => void;
   shouldClearAfterAnalysis?: boolean;
 }
 
-export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHistory, shouldClearAfterAnalysis }: SearchBarProps) {
+export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery = '', onToggleHistory, shouldClearAfterAnalysis }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
 
   // Clear search box when analysis completes
@@ -72,11 +73,9 @@ export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHis
           className="min-w-[100px] w-full sm:w-auto"
         >
           {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span className="hidden sm:inline">Analysing</span>
-              <span className="sm:hidden">...</span>
-            </>
+            <span className="text-sm">
+              {loadingMessage || 'Processing...'}
+            </span>
           ) : (
             <>
               <span className="hidden sm:inline">Analyse</span>
@@ -85,6 +84,16 @@ export function SearchBar({ onAnalyse, isLoading, initialQuery = '', onToggleHis
           )}
         </Button>
       </form>
+      
+      {/* Loading message display */}
+      {isLoading && loadingMessage && (
+        <div className="mt-3 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            {loadingMessage}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

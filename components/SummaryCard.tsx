@@ -138,18 +138,25 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
 
   const handleViewChannel = () => {
     if (channel?.handle) {
-      // Create YouTube channel URL from handle
+      // Use official YouTube URL format
       const channelUrl = `https://www.youtube.com/${channel.handle}`;
       
       // Detect mobile devices
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
       if (isMobile) {
-        // Try to open in YouTube app first, fallback to web
-        window.location.href = `youtube://channel/${channel.handle.replace('@', '')}`;
-        setTimeout(() => {
+        if (isIOS) {
+          // iOS: Use official YouTube URL - iOS will automatically try YouTube app first
           window.open(channelUrl, '_blank');
-        }, 500);
+        } else {
+          // Android: Try YouTube app scheme first, fallback to web
+          const appUrl = `youtube://channel/${channel.handle.replace('@', '')}`;
+          window.location.href = appUrl;
+          setTimeout(() => {
+            window.open(channelUrl, '_blank');
+          }, 500);
+        }
       } else {
         // Desktop: open in new tab
         window.open(channelUrl, '_blank');

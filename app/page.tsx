@@ -16,6 +16,7 @@ import { incrementSearchCount } from '@/lib/session';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [results, setResults] = useState<AnalyseResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -27,12 +28,21 @@ export default function Home() {
 
   const handleAnalyse = async (searchQuery: string) => {
     setIsLoading(true);
+    setLoadingMessage('Fetching video information...');
     setError(null);
     setResults(null);
     setQuery(searchQuery);
     setShouldClearSearch(false);
 
     try {
+      // Update loading message after a brief delay
+      const messageTimer1 = setTimeout(() => {
+        setLoadingMessage('Analysing content...');
+      }, 2000);
+      
+      const messageTimer2 = setTimeout(() => {
+        setLoadingMessage('Producing report...');
+      }, 5000);
       const response = await fetch('/api/analyse', {
         method: 'POST',
         headers: {
@@ -40,6 +50,10 @@ export default function Home() {
         },
         body: JSON.stringify({ q: searchQuery }),
       });
+
+      // Clear timers since we got a response
+      clearTimeout(messageTimer1);
+      clearTimeout(messageTimer2);
 
       const data = await response.json();
 
@@ -62,6 +76,7 @@ export default function Home() {
       setError(err.message || 'Something went wrong');
     } finally {
       setIsLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -116,6 +131,7 @@ export default function Home() {
           <SearchBar 
             onAnalyse={handleAnalyse} 
             isLoading={isLoading}
+            loadingMessage={loadingMessage}
             initialQuery={query}
             onToggleHistory={() => setIsHistoryOpen(true)}
            shouldClearAfterAnalysis={shouldClearSearch}
@@ -123,17 +139,20 @@ export default function Home() {
 
           {/* Results Area */}
           <div className="flex-1 p-4 sm:p-6 min-h-0">
-            {error && (
-              <Alert className="mb-6 border-red-200 bg-red-50">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-800">
-                  {getErrorMessage(error)}
-                </AlertDescription>
-              </Alert>
-            )}
-
             {results && (
               <div className="space-y-6">
+                <SummaryCard 
+                  aggregate={results.aggregate} 
+                  channel={results.channel}
+                  transcriptCoverage={results.transcriptCoverage}
+                  videos={results.videos}
+                />
+                
+                <CategoryTable scores={results.aggregate.scores} />
+                
+                <VideoList videos={results.videos} />
+                
+                {/* Move warnings after the dashboard */}
                 {results.warnings && results.warnings.length > 0 && (
                   <Alert className="border-amber-200 bg-amber-50">
                     <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -146,18 +165,17 @@ export default function Home() {
                     </AlertDescription>
                   </Alert>
                 )}
-
-                <SummaryCard 
-                  aggregate={results.aggregate} 
-                  channel={results.channel}
-                  transcriptCoverage={results.transcriptCoverage}
-                  videos={results.videos}
-                />
-                
-                <CategoryTable scores={results.aggregate.scores} />
-                
-                <VideoList videos={results.videos} />
               </div>
+            )}
+            
+            {/* Move error messages after results area */}
+            {error && (
+              <Alert className="mt-6 border-red-200 bg-red-50">
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">
+                  {getErrorMessage(error)}
+                </AlertDescription>
+              </Alert>
             )}
 
             {!results && !error && !isLoading && (

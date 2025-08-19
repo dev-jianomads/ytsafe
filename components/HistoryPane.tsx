@@ -58,17 +58,24 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
       url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
     }
     
-    // Smart link behavior: mobile vs desktop
+    // Detect device type
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     
     if (isMobile) {
-      // Try to open in YouTube app first, fallback to browser
-      const youtubeAppUrl = url.replace('https://www.youtube.com', 'youtube://');
-      window.location.href = youtubeAppUrl;
-      setTimeout(() => {
+      if (isIOS) {
+        // iOS: Use official YouTube URL - iOS will automatically try YouTube app first
         window.open(url, '_blank');
-      }, 500);
+      } else {
+        // Android: Try YouTube app scheme first, fallback to web
+        const youtubeAppUrl = url.replace('https://www.youtube.com', 'youtube://');
+        window.location.href = youtubeAppUrl;
+        setTimeout(() => {
+          window.open(url, '_blank');
+        }, 500);
+      }
     } else {
+      // Desktop: open in web browser
       window.open(url, '_blank');
     }
   };
