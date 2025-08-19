@@ -70,6 +70,8 @@ export async function saveFeedback(data: FeedbackData): Promise<boolean> {
         hint: error.hint
         payload: data,
         supabaseUrl: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'missing'
+      }
+      )
       return false;
     } else {
       console.log('✅ Feedback saved successfully to Supabase!', {
