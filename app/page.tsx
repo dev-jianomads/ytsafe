@@ -13,6 +13,7 @@ import { AlertTriangle, Heart } from 'lucide-react';
 import type { AnalyseResponse, HistoryItem } from '@/types';
 import { saveToHistory } from '@/lib/history';
 import { incrementSearchCount } from '@/lib/session';
+import { hashUserAgent } from '@/lib/analytics';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,7 @@ export default function Home() {
   const [shouldClearSearch, setShouldClearSearch] = useState(false);
   const [historyKey, setHistoryKey] = useState(0); // Force history refresh
   const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackSessionId, setFeedbackSessionId] = useState('');
+  const [feedbackData, setFeedbackData] = useState<{ sessionId: string; userAgentHash?: string }>({ sessionId: '' });
 
   const handleAnalyse = async (searchQuery: string) => {
     setIsLoading(true);
@@ -67,9 +68,11 @@ export default function Home() {
       setShouldClearSearch(true);
       
       // Check if we should show feedback after successful search
-      const { shouldShowFeedback, sessionId } = incrementSearchCount();
+      const userAgent = navigator.userAgent;
+      const userAgentHash = userAgent ? hashUserAgent(userAgent) : undefined;
+      const { shouldShowFeedback, sessionId, userAgentHash: storedHash } = incrementSearchCount(userAgentHash);
       if (shouldShowFeedback) {
-        setFeedbackSessionId(sessionId);
+        setFeedbackData({ sessionId, userAgentHash: storedHash });
         setShowFeedback(true);
       }
     } catch (err: any) {
@@ -288,7 +291,8 @@ export default function Home() {
       <FeedbackModal
         isOpen={showFeedback}
         onClose={() => setShowFeedback(false)}
-        sessionId={feedbackSessionId}
+        sessionId={feedbackData.sessionId}
+        userAgentHash={feedbackData.userAgentHash}
       />
     </div>
   );

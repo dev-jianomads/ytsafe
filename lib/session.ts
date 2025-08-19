@@ -8,6 +8,7 @@ export interface SessionData {
   searchCount: number;
   feedbackShown: boolean;
   createdAt: number;
+  userAgentHash?: string;
 }
 
 // Generate a persistent session ID that lasts for the browser session
@@ -53,9 +54,14 @@ export function getOrCreateSession(): SessionData {
 }
 
 // Increment search count and return whether to show feedback
-export function incrementSearchCount(): { shouldShowFeedback: boolean; sessionId: string } {
+export function incrementSearchCount(userAgentHash?: string): { shouldShowFeedback: boolean; sessionId: string; userAgentHash?: string } {
   const session = getOrCreateSession();
   session.searchCount += 1;
+  
+  // Store the user agent hash if provided
+  if (userAgentHash) {
+    session.userAgentHash = userAgentHash;
+  }
 
   // Show feedback after 3rd search, not 2nd
   const shouldShowFeedback = session.searchCount === 3 && !session.feedbackShown;
@@ -75,7 +81,8 @@ export function incrementSearchCount(): { shouldShowFeedback: boolean; sessionId
 
   return {
     shouldShowFeedback,
-    sessionId: session.sessionId
+    sessionId: session.sessionId,
+    userAgentHash: session.userAgentHash
   };
 }
 

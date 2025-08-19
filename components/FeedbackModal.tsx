@@ -7,16 +7,16 @@ import { Card } from '@/components/ui/card';
 import { X, Star, MessageSquare } from 'lucide-react';
 import { saveFeedback } from '@/lib/feedback';
 import { markFeedbackShown } from '@/lib/session';
-import { hashUserAgent } from '@/lib/analytics';
 import { toast } from 'sonner';
 
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
   sessionId: string;
+  userAgentHash?: string;
 }
 
-export function FeedbackModal({ isOpen, onClose, sessionId }: FeedbackModalProps) {
+export function FeedbackModal({ isOpen, onClose, sessionId, userAgentHash }: FeedbackModalProps) {
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState('');
   const [showCommentField, setShowCommentField] = useState(false);
@@ -33,10 +33,6 @@ export function FeedbackModal({ isOpen, onClose, sessionId }: FeedbackModalProps
     if (score === null) return;
 
     setIsSubmitting(true);
-    
-    // Get user agent hash for user identification
-    const userAgent = navigator.userAgent;
-    const userAgentHash = hashUserAgent(userAgent);
     
     console.log('🎯 Submitting feedback:', {
       sessionId,
