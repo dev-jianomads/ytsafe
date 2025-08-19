@@ -1,12 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client for feedback
-const supabaseUrl = typeof window !== 'undefined' 
-  ? process.env.NEXT_PUBLIC_SUPABASE_URL 
-  : process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = typeof window !== 'undefined'
-  ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 let supabase: any = null;
 
@@ -49,7 +45,9 @@ export async function saveFeedback(data: FeedbackData): Promise<boolean> {
       session_id: data.session_id,
       score: data.score,
       hasComment: !!data.comment,
-      commentLength: data.comment?.length || 0
+      commentLength: data.comment?.length || 0,
+      supabaseUrl: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'missing',
+      supabaseAnonKey: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 10)}...` : 'missing'
     });
 
     // Validate data before sending
@@ -67,11 +65,10 @@ export async function saveFeedback(data: FeedbackData): Promise<boolean> {
         error: error.message,
         code: error.code,
         details: error.details,
-        hint: error.hint
+        hint: error.hint,
         payload: data,
-        supabaseUrl: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'missing'
-      }
-      )
+        table: 'feedback'
+      });
       return false;
     } else {
       console.log('✅ Feedback saved successfully to Supabase!', {
