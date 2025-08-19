@@ -32,6 +32,12 @@ export function FeedbackModal({ isOpen, onClose, sessionId }: FeedbackModalProps
     if (score === null) return;
 
     setIsSubmitting(true);
+    
+    console.log('🎯 Submitting feedback:', {
+      sessionId,
+      score,
+      comment: comment.trim() || undefined
+    });
 
     try {
       const feedbackData = {
@@ -47,20 +53,19 @@ export function FeedbackModal({ isOpen, onClose, sessionId }: FeedbackModalProps
           description: 'Your input helps us improve the app.',
           duration: 3000,
         });
+        markFeedbackShown();
+        onClose();
       } else {
         toast.error('Failed to save feedback', {
-          description: 'Please try again later.',
-          duration: 3000,
+          description: 'Please check the console for details and try again.',
+          duration: 5000,
         });
       }
-
-      markFeedbackShown();
-      onClose();
     } catch (error) {
       console.error('Error submitting feedback:', error);
       toast.error('Failed to save feedback', {
-        description: 'Please try again later.',
-        duration: 3000,
+        description: 'Unexpected error occurred. Check console for details.',
+        duration: 5000,
       });
     } finally {
       setIsSubmitting(false);

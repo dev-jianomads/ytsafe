@@ -57,7 +57,15 @@ export function incrementSearchCount(): { shouldShowFeedback: boolean; sessionId
   const session = getOrCreateSession();
   session.searchCount += 1;
 
+  // Show feedback after 3rd search, not 2nd
   const shouldShowFeedback = session.searchCount === 3 && !session.feedbackShown;
+  
+  console.log('📊 Search count updated:', {
+    sessionId: session.sessionId,
+    searchCount: session.searchCount,
+    feedbackShown: session.feedbackShown,
+    shouldShowFeedback
+  });
 
   try {
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
