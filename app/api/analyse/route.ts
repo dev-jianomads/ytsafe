@@ -8,7 +8,18 @@ import { trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
 
 export const dynamic = 'force-dynamic';
 
-const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure. Consider innuendo, hate slurs, graphic detail, drug instructions, gambling/betting content, loot boxes, self-harm, and aggressive advertising reads. Factor in community discussion tone and appropriateness. Prefer conservative ratings for ambiguity. Also include a short "riskNote" (3–6 words). Output ONLY JSON.`;
+const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure.
+
+CATEGORY DEFINITIONS:
+- violence: Physical violence, fighting, weapons, graphic action
+- language: Profanity, hate speech, slurs, inappropriate language
+- sexual_content: Sexual themes, innuendo, suggestive content
+- substances: Alcohol, drugs, smoking, substance abuse instructions
+- gambling: Betting, loot boxes, gambling mechanics, casino content
+- sensitive_topics: Mental health, death/grief, family trauma, bullying, scary themes, political/religious controversy, identity discussions inappropriate for age
+- commercial_pressure: Aggressive advertising, sponsorship pressure, product placement, purchase pressure
+
+Factor in community discussion tone and appropriateness. Prefer conservative ratings for ambiguity. Also include a short "riskNote" (3–6 words). Output ONLY JSON.`;
 
 const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and safety concerns. Output JSON with: "avgSentiment" (positive/neutral/negative), "communityFlags" (array of concerns like "inappropriate language", "mature discussions", "young audience present", "toxic behavior", etc.). Focus on family-safety implications. Output ONLY JSON.`;
 
