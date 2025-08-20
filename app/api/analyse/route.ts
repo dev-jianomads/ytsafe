@@ -378,6 +378,13 @@ export async function POST(req: NextRequest) {
                 ) as Record<CategoryKey, 0|1|2|3|4>;
               }
             } else {
+              console.error(`Schema validation failed for video ${videoId}:`, {
+                validationErrors: result.error.errors,
+                rawResponse: responseText,
+                parsedData: parsed,
+                videoTitle: video.snippet?.title,
+                bundleLength: bundle.length
+              });
               throw new Error("Invalid classification response");
             }
           } catch (error) {
