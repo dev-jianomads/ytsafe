@@ -354,16 +354,45 @@ export async function POST(req: NextRequest) {
               throw new Error("Invalid classification response");
             }
           } catch (error) {
-            // Fallback to conservative defaults
+            // Fallback to conservative defaults - INVESTIGATE: Why is this failing?
             console.error(`OpenAI analysis failed for video ${videoId}:`, {
               error: error instanceof Error ? error.message : 'Unknown error',
               videoTitle: video.snippet?.title,
-              bundleLength: bundle.length
+              bundleLength: bundle.length,
+              hasTranscript: !!transcript,
+              commentCount: comments.length,
+              bundle: bundle.substring(0, 200) + '...' // First 200 chars for debugging
             });
             
-            categoryScores = Object.fromEntries(
-              CATEGORIES.map(k => [k, 1])
-            ) as Record<CategoryKey, 0|1|2|3|4>;
+            // CRITICAL FIX: Detect obvious gambling content in titles
+            const title = video.snippet?.title?.toLowerCase() || '';
+            const description = video.snippet?.description?.toLowerCase() || '';
+            const content = `${title} ${description}`;
+            
+            // Check for gambling keywords
+            const gamblingKeywords = [
+              'slots', 'pokie', 'poker', 'casino', 'bet', 'betting', 'jackpot',
+              'spin', 'reel', 'gambling', 'wager', 'stake', '$', 'win', 'payout'
+            ];
+            
+            const hasGamblingKeywords = gamblingKeywords.some(keyword => 
+              content.includes(keyword)
+            );
+            
+            if (hasGamblingKeywords) {
+              // High gambling score for obvious gambling content
+              categoryScores = Object.fromEntries(
+                CATEGORIES.map(k => [k, k === 'gambling' ? 4 : 1])
+              ) as Record<CategoryKey, 0|1|2|3|4>;
+              riskNote = "gambling content detected";
+              console.log(`🎰 Gambling content detected in fallback for: ${title}`);
+            } else {
+              // Conservative fallback for other content
+              categoryScores = Object.fromEntries(
+                CATEGORIES.map(k => [k, 2]) // Changed from 1 to 2 for true conservative approach
+              ) as Record<CategoryKey, 0|1|2|3|4>;
+            }
+            
             riskNote = "analysis failed";
             warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
           }
