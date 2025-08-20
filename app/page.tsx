@@ -228,7 +228,7 @@ export default function Home() {
                     
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">4</span>
+                        <span className="text-xs font-bold text-green-700">5</span>
                       </div>
                       <div>
                         <p className="font-medium mb-1">We focus on recent videos</p>
@@ -238,7 +238,7 @@ export default function Home() {
                     
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">5</span>
+                        <span className="text-xs font-bold text-green-700">6</span>
                       </div>
                       <div>
                         <p className="font-medium mb-1">💡 Parent Tip</p>
@@ -261,8 +261,8 @@ export default function Home() {
                       provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family.
                     </p>
                     
-                    <h5 className="font-semibold text-green-900 mb-2">Complete Rating Categories & Coverage</h5>
-                    <div className="grid grid-cols-2 gap-2 text-xs mb-4">
+                    <h5 className="font-semibold text-green-900 mb-2">Rating Categories (Just Like Video Games)</h5>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-5 bg-green-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">E</div>
                         <span className="text-green-700">Ages 6 and under</span>
