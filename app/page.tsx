@@ -228,26 +228,16 @@ export default function Home() {
                     
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">5</span>
+                        <span className="text-xs font-bold text-green-700">4</span>
                       </div>
                       <div>
                         <p className="font-medium mb-1">We focus on recent videos</p>
                         <p className="text-green-700">Channels change over time. We analyze the 5 most recent videos to give you current safety information, not outdated ratings.</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">6</span>
-                      </div>
-                      <div>
-                        <p className="font-medium mb-1">💡 Parent Tip</p>
-                        <p className="text-green-700 font-medium">Always preview content yourself and consider your child's individual maturity level alongside these ratings.</p>
-                      </div>
-                    </div>
                   </div>
                   
-                  {/* ESRB Description and Rating Categories merged */}
+                  {/* Complete Rating Categories & Coverage Section */}
                   <div className="mt-6 p-4 bg-white rounded-lg border border-green-100">
                     <p className="text-sm text-green-800 leading-relaxed mb-4">
                       <a 
@@ -280,17 +270,17 @@ export default function Home() {
                         <span className="text-green-700">Ages 16 and up</span>
                       </div>
                     </div>
-                    
-                    {/* Educational Content Protection Section */}
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                      <h6 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                        <span className="text-blue-600">🎓</span>
-                        Educational Content Protection
-                      </h6>
-                      <p className="text-xs text-blue-800 leading-relaxed">
-                        Our system recognizes educational intent and automatically reduces scores by 1 point across all categories for genuinely educational content. This means science experiments discussing "dangerous" chemicals, history lessons about wars, or health education about mental health topics get fair treatment and aren't over-penalized.
-                      </p>
-                    </div>
+                  </div>
+                  
+                  {/* Educational Content Protection Section */}
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <h6 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                      <span className="text-blue-600">🎓</span>
+                      Educational Content Protection
+                    </h6>
+                    <p className="text-xs text-blue-800 leading-relaxed">
+                      Our system recognizes educational intent and automatically reduces scores by 1 point across all categories for genuinely educational content. This means science experiments discussing "dangerous" chemicals, history lessons about wars, or health education about mental health topics get fair treatment and aren't over-penalized.
+                    </p>
                   </div>
                 </div>
               </Card>
