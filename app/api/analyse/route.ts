@@ -369,31 +369,120 @@ export async function POST(req: NextRequest) {
             const description = video.snippet?.description?.toLowerCase() || '';
             const content = `${title} ${description}`;
             
-            // Check for gambling keywords
+            // ENHANCED FALLBACK: Detect problematic content by keywords
+            const detectedCategories = {
+              violence: 1,
+              language: 1, 
+              sexual_content: 1,
+              substances: 1,
+              gambling: 1,
+              sensitive_topics: 1,
+              commercial_pressure: 1
+            };
+
+            // 🎰 GAMBLING DETECTION
             const gamblingKeywords = [
               'slots', 'pokie', 'poker', 'casino', 'bet', 'betting', 'jackpot',
-              'spin', 'reel', 'gambling', 'wager', 'stake', '$', 'win', 'payout'
+              'spin', 'reel', 'gambling', 'wager', 'stake', 'win money', 'payout',
+              'odds', 'blackjack', 'roulette', 'scratch card', 'lottery'
             ];
-            
-            const hasGamblingKeywords = gamblingKeywords.some(keyword => 
-              content.includes(keyword)
-            );
-            
-            if (hasGamblingKeywords) {
-              // High gambling score for obvious gambling content
-              categoryScores = Object.fromEntries(
-                CATEGORIES.map(k => [k, k === 'gambling' ? 4 : 1])
-              ) as Record<CategoryKey, 0|1|2|3|4>;
-              riskNote = "gambling content detected";
-              console.log(`🎰 Gambling content detected in fallback for: ${title}`);
-            } else {
-              // Conservative fallback for other content
-              categoryScores = Object.fromEntries(
-                CATEGORIES.map(k => [k, 2]) // Changed from 1 to 2 for true conservative approach
-              ) as Record<CategoryKey, 0|1|2|3|4>;
+            if (gamblingKeywords.some(keyword => content.includes(keyword)) || 
+                /\$\d+/.test(content) || // Dollar amounts like $5, $10
+                /bet\s*\$/.test(content)) { // "bet $" patterns
+              detectedCategories.gambling = 4;
+              console.log(`🎰 Gambling content detected: ${title}`);
             }
+
+            // 🤬 LANGUAGE DETECTION  
+            const languageKeywords = [
+              'fuck', 'shit', 'damn', 'hell', 'bitch', 'ass', 'crap',
+              'uncensored', 'explicit', 'nsfw', 'adult language', 'profanity'
+            ];
+            if (languageKeywords.some(keyword => content.includes(keyword))) {
+              detectedCategories.language = 3;
+              console.log(`🤬 Strong language detected: ${title}`);
+            }
+
+            // 🥊 VIOLENCE DETECTION
+            const violenceKeywords = [
+              'fight', 'fighting', 'blood', 'gore', 'kill', 'murder', 'death',
+              'weapon', 'gun', 'knife', 'war', 'battle', 'combat', 'brutal',
+              'violent', 'attack', 'assault', 'torture', 'graphic'
+            ];
+            if (violenceKeywords.some(keyword => content.includes(keyword))) {
+              detectedCategories.violence = 3;
+              console.log(`🥊 Violence detected: ${title}`);
+            }
+
+            // 💋 SEXUAL CONTENT DETECTION
+            const sexualKeywords = [
+              'sex', 'sexy', 'nude', 'naked', 'porn', 'adult', 'erotic',
+              'sexual', 'intimate', 'seductive', 'suggestive', 'bikini',
+              'lingerie', 'dating', 'hookup', 'mature content'
+            ];
+            if (sexualKeywords.some(keyword => content.includes(keyword))) {
+              detectedCategories.sexual_content = 3;
+              console.log(`💋 Sexual content detected: ${title}`);
+            }
+
+            // 🍺 SUBSTANCES DETECTION
+            const substanceKeywords = [
+              'drunk', 'alcohol', 'beer', 'wine', 'vodka', 'whiskey', 'smoking',
+              'weed', 'marijuana', 'drugs', 'high', 'stoned', 'vaping', 'vape',
+              'cigarette', 'tobacco', 'party', 'drinking game'
+            ];
+            if (substanceKeywords.some(keyword => content.includes(keyword))) {
+              detectedCategories.substances = 3;
+              console.log(`🍺 Substance content detected: ${title}`);
+            }
+
+            // 🧠 SENSITIVE TOPICS DETECTION
+            const sensitiveKeywords = [
+              'suicide', 'depression', 'anxiety', 'self harm', 'cutting', 'death',
+              'funeral', 'tragedy', 'trauma', 'abuse', 'bullying', 'scary',
+              'horror', 'nightmare', 'disturbing', 'controversial', 'political',
+              'religion', 'conspiracy', 'eating disorder', 'anorexia'
+            ];
+            if (sensitiveKeywords.some(keyword => content.includes(keyword))) {
+              detectedCategories.sensitive_topics = 3;
+              console.log(`🧠 Sensitive content detected: ${title}`);
+            }
+
+            // 💰 COMMERCIAL PRESSURE DETECTION
+            const commercialKeywords = [
+              'buy now', 'limited time', 'sale', 'discount', 'promo code',
+              'sponsor', 'ad', 'advertisement', 'affiliate', 'get rich',
+              'make money', 'earn cash', 'investment', 'crypto', 'bitcoin',
+              'scam', 'pyramid', 'mlm', 'clickbait', 'subscribe for'
+            ];
+            if (commercialKeywords.some(keyword => content.includes(keyword))) {
+              detectedCategories.commercial_pressure = 3;
+              console.log(`💰 Commercial pressure detected: ${title}`);
+            }
+
+            // Apply detected scores with safety-first approach
+            categoryScores = Object.fromEntries(
+              CATEGORIES.map(k => [k, Math.max(2, detectedCategories[k as CategoryKey])])
+            ) as Record<CategoryKey, 0|1|2|3|4>;
             
-            riskNote = "analysis failed";
+            // Generate appropriate risk note
+            const highestCategory = Object.entries(detectedCategories)
+              .sort((a, b) => b[1] - a[1])[0];
+            
+            if (highestCategory[1] >= 3) {
+              const categoryNames: Record<string, string> = {
+                gambling: 'gambling content',
+                language: 'strong language', 
+                violence: 'violent content',
+                sexual_content: 'sexual content',
+                substances: 'substance use',
+                sensitive_topics: 'sensitive topics',
+                commercial_pressure: 'commercial pressure'
+              };
+              riskNote = categoryNames[highestCategory[0]] || 'analysis failed';
+            } else {
+              riskNote = "analysis failed";
+            }
             warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
           }
 
