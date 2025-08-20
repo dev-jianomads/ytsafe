@@ -232,7 +232,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="font-medium mb-1">We focus on recent videos</p>
-                        <p className="text-green-700">Channels change over time. We analyze the 8 most recent videos to give you current safety information, not outdated ratings.</p>
+                        <p className="text-green-700">Channels change over time. We analyze the 5 most recent videos to give you current safety information, not outdated ratings.</p>
                       </div>
                     </div>
                     
