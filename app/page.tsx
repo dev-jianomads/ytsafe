@@ -290,7 +290,6 @@ export default function Home() {
                       <p className="text-xs text-blue-800 leading-relaxed">
                         Our system recognizes educational intent and automatically reduces scores by 1 point across all categories for genuinely educational content. This means science experiments discussing "dangerous" chemicals, history lessons about wars, or health education about mental health topics get fair treatment and aren't over-penalized.
                       </p>
-                      </div>
                     </div>
                   </div>
                 </div>
