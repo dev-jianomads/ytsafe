@@ -17,7 +17,15 @@ Category definitions:
 - substances: Alcohol, drugs, smoking, vaping, substance abuse
 - gambling: Betting, casino games, loot boxes, gambling mechanics
 - sensitive_topics: Mental health, death/grief, family trauma, bullying, scary themes, political/religious controversy, identity discussions inappropriate for age
-- commercial_pressure: Sponsorships, product placement, aggressive sales tactics, influencer marketing targeting children, scams, deceptive advertising, financial cons, MLM schemes, fake product claims`;
+- commercial_pressure: Sponsorships, product placement, aggressive sales tactics, influencer marketing targeting children, scams, deceptive advertising, financial cons, MLM schemes, fake product claims
+
+Educational Intent Detection:
+- Distinguish between educational/documentary content vs promotional/entertainment content
+- Educational discussions of sensitive topics for age-appropriate learning should receive lower scores than entertainment exploitation
+- Consider the intent: Educational/awareness = lower score, Entertainment/sensational = higher score, Promotional/exploitative = highest score
+- Evaluate HOW topics are presented: Clinical/educational tone = lower risk, Sensationalized/dramatic = higher risk, Age-appropriate explanations = lower risk
+
+Additional field: isEducational (boolean) - true if content appears to be primarily educational/documentary in nature with responsible presentation of topics.`;
 
 const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and flags. Return JSON with: avgSentiment (positive/neutral/negative), communityFlags (array of strings like "inappropriate language", "spam", "controversy", "harassment").`;
 
@@ -203,6 +211,7 @@ export async function POST(req: NextRequest) {
           let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
           let riskNote = "";
           let commentAnalysis: any = undefined;
+          let isEducational = false;
           
           // Calculate engagement metrics
           const engagementMetrics = calculateEngagementMetrics(
@@ -267,7 +276,7 @@ export async function POST(req: NextRequest) {
               totalTokens += usage.total_tokens || 0;
               openaiRequestsCount++;
               
-              console.log(\`OpenAI Token Usage for video ${videoId}:`, {
+              console.log(`OpenAI Token Usage for video ${videoId}:`, {
                 prompt_tokens: usage.prompt_tokens,
                 completion_tokens: usage.completion_tokens,
                 total_tokens: usage.total_tokens,
@@ -305,7 +314,7 @@ export async function POST(req: NextRequest) {
                   totalTokens += retryUsage.total_tokens || 0;
                   openaiRequestsCount++;
                   
-                  console.log(\`OpenAI Retry Token Usage for video ${videoId}:`, {
+                  console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
                     prompt_tokens: retryUsage.prompt_tokens,
                     completion_tokens: retryUsage.completion_tokens,
                     total_tokens: retryUsage.total_tokens
@@ -314,10 +323,10 @@ export async function POST(req: NextRequest) {
 
                 const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
                 const retryJsonMatch = retryText.match(/\{[\s\S]*\}/);
-                const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
+                const retryJsonString = retryJsonMatch ? retryJsonString[0] : retryText;
                 parsed = JSON.parse(retryJsonString);
               } catch (retryError) {
-                console.error(\`JSON parsing failed for video ${videoId}:`, {
+                console.error(`JSON parsing failed for video ${videoId}:`, {
                   originalResponse: responseText,
                   retryResponse: retryCompletion?.choices[0]?.message?.content || 'No retry response',
                   error: retryError
@@ -332,9 +341,10 @@ export async function POST(req: NextRequest) {
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
               ) as Record<CategoryKey, 0|1|2|3|4>;
               riskNote = result.data.riskNote;
+              isEducational = result.data.isEducational || false;
               
               // Apply educational modifier if content is educational
-              if (result.data.isEducational) {
+              if (isEducational) {
                 // Reduce scores by 1 point for educational content (minimum 0)
                 categoryScores = Object.fromEntries(
                   CATEGORIES.map(k => [k, Math.max(0, categoryScores[k] - 1)])
@@ -375,6 +385,7 @@ export async function POST(req: NextRequest) {
             engagementMetrics,
             categoryScores,
             riskNote: riskNote.slice(0, 64),
+            isEducational,
             commentAnalysis
           };
         });
