@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
           if (comments.length > 0) {
             const commentText = comments
               .slice(0, 8) // Reduced to top 8 comments
-              .map(c => \`Comment (${c.likeCount} likes): ${c.text}`)
+              .map(c => `${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
               .join("\n");
             bundle += "\n\nTOP COMMENTS:\n" + commentText.slice(0, 1500); // Reduced token usage
           }
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
             try {
               const commentBundle = comments
                 .slice(0, 8) // Reduced comment analysis scope
-                .map(c => \`${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
+                .map(c => `${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
                 .join("\n");
 
               const commentCompletion = await openai.chat.completions.create({
@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
                 communityFlags: commentParsed.communityFlags || []
               };
             } catch (error) {
-              console.warn(\`Comment analysis failed for video ${videoId}:`, error);
+              console.warn(`Comment analysis failed for video ${videoId}:`, error);
             }
           }
 
@@ -345,7 +345,7 @@ export async function POST(req: NextRequest) {
             }
           } catch (error) {
             // Fallback to conservative defaults
-            console.error(\`OpenAI analysis failed for video ${videoId}:`, {
+            console.error(`OpenAI analysis failed for video ${videoId}:`, {
               error: error instanceof Error ? error.message : 'Unknown error',
               videoTitle: video.snippet?.title,
               bundleLength: bundle.length
@@ -355,7 +355,7 @@ export async function POST(req: NextRequest) {
               CATEGORIES.map(k => [k, 1])
             ) as Record<CategoryKey, 0|1|2|3|4>;
             riskNote = "analysis failed";
-            warnings.push(\`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
+            warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
           }
 
           const maxScore = Math.max(...Object.values(categoryScores));
@@ -366,7 +366,7 @@ export async function POST(req: NextRequest) {
 
           return {
             videoId,
-            url: \`https://www.youtube.com/watch?v=${videoId}`,
+            url: `https://www.youtube.com/watch?v=${videoId}`,
             title: video.snippet?.title ?? "Untitled",
             publishedAt: video.snippet?.publishedAt ?? "",
             viewCount,
@@ -388,7 +388,7 @@ export async function POST(req: NextRequest) {
       const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
       if (transcriptAvailabilityRate < 0.4) {
         const availablePercent = Math.round(transcriptAvailabilityRate * 100);
-        warnings.push(\`Limited content analysis: Only ${availablePercent}% of videos had transcripts available. Ratings are based on titles, descriptions, comments, and engagement patterns only. This may result in less detailed content assessment since spoken content couldn't be evaluated.`);
+        warnings.push(`Limited content analysis: Only ${availablePercent}% of videos had transcripts available. Ratings are based on titles, descriptions, comments, and engagement patterns only. This may result in less detailed content assessment since spoken content couldn't be evaluated.`);
       }
 
       // Aggregate scores
