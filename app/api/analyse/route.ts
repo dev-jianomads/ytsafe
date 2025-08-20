@@ -147,6 +147,7 @@ export async function POST(req: NextRequest) {
       const openai = new OpenAI({ apiKey: OPENAI_KEY });
       const videos: PerVideoScore[] = [];
       const warnings: string[] = [];
+      let analysisFailureCount = 0;
       let transcriptAvailable = 0;
       let totalVideos = detailsData.items?.length || 0;
 
@@ -537,7 +538,7 @@ export async function POST(req: NextRequest) {
             } else {
               riskNote = "analysis failed";
             }
-            warnings.push(`AI couldn't fully analyze "${video.snippet?.title || 'Unknown video'}" so we used conservative safety ratings based on keywords and video information. When in doubt, we err on the side of caution.`);
+            analysisFailureCount++;
           }
 
           const maxScore = Math.max(...Object.values(categoryScores));
@@ -565,6 +566,11 @@ export async function POST(req: NextRequest) {
         // Wait for batch to complete and add to videos array
         const batchResults = await Promise.all(batchPromises);
         videos.push(...batchResults);
+      }
+
+      // Add grouped analysis failure message if any videos failed
+      if (analysisFailureCount > 0) {
+        warnings.push(`AI couldn't fully analyze ${analysisFailureCount} of ${totalVideos} videos due to technical limitations, so for those we used conservative safety ratings based on keywords and video information. When in doubt, we err on the side of caution.`);
       }
 
       // Check transcript availability and add appropriate warning
