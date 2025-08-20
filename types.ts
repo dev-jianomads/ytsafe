@@ -19,6 +19,7 @@ export type PerVideoScore = {
   };
   categoryScores: Record<CategoryKey, 0|1|2|3|4>;
   riskNote: string;
+  isEducational?: boolean;
   commentAnalysis?: {
     totalComments: number;
     avgSentiment: 'positive' | 'neutral' | 'negative';

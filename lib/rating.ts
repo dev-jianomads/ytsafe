@@ -66,5 +66,6 @@ export const VideoScoreSchema = z.object({
   gambling: z.number().min(0).max(4),
   sensitive_topics: z.number().min(0).max(4),
   commercial_pressure: z.number().min(0).max(4),
-  riskNote: z.string().max(64)
+  riskNote: z.string().max(64),
+  isEducational: z.boolean().optional()
 });

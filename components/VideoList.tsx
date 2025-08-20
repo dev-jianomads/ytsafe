@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, MessageCircle, ThumbsUp, AlertTriangle, TrendingUp, Eye } from 'lucide-react';
+import { ExternalLink, MessageCircle, ThumbsUp, AlertTriangle, TrendingUp, Eye, GraduationCap } from 'lucide-react';
 import type { PerVideoScore } from '@/types';
 
 interface VideoListProps {
@@ -107,6 +107,16 @@ export function VideoList({ videos }: VideoListProps) {
                   >
                     {video.riskNote}
                   </Badge>
+                  
+                  {video.isEducational && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs whitespace-nowrap self-start sm:self-auto bg-blue-50 text-blue-700 border-blue-200"
+                    >
+                      <GraduationCap className="h-3 w-3 mr-1" />
+                      Educational
+                    </Badge>
+                  )}
                   
                   {video.commentAnalysis && (
                     <div className="flex items-center gap-1 text-xs text-gray-500">

@@ -19,10 +19,6 @@ Category definitions:
 - sensitive_topics: Mental health, death/grief, family trauma, bullying, scary themes, political/religious controversy, identity discussions inappropriate for age
 - commercial_pressure: Sponsorships, product placement, aggressive sales tactics, influencer marketing targeting children, scams, deceptive advertising, financial cons, MLM schemes, fake product claims
 
-Consider community discussion tone and appropriateness. Prefer conservative ratings for ambiguity. Also include a short "riskNote" (3–6 words). Output ONLY JSON.`;
-
-const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and safety concerns. Output JSON with: "avgSentiment" (positive/neutral/negative), "communityFlags" (array of concerns like "inappropriate language", "mature discussions", "young audience present", "toxic behavior", etc.). Focus on family-safety implications. Output ONLY JSON.`;
-
 function calculateEngagementMetrics(
   viewCount: number, 
   likeCount: number, 
@@ -334,6 +330,14 @@ export async function POST(req: NextRequest) {
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
               ) as Record<CategoryKey, 0|1|2|3|4>;
               riskNote = result.data.riskNote;
+              
+              // Apply educational modifier if content is educational
+              if (result.data.isEducational) {
+                // Reduce scores by 1 point for educational content (minimum 0)
+                categoryScores = Object.fromEntries(
+                  CATEGORIES.map(k => [k, Math.max(0, categoryScores[k] - 1)])
+                ) as Record<CategoryKey, 0|1|2|3|4>;
+              }
             } else {
               throw new Error("Invalid classification response");
             }
@@ -369,6 +373,7 @@ export async function POST(req: NextRequest) {
             engagementMetrics,
             categoryScores,
             riskNote: riskNote.slice(0, 64),
+            isEducational: result.success ? result.data.isEducational : undefined,
             commentAnalysis
           };
         });
