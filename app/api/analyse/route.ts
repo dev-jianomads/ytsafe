@@ -367,7 +367,7 @@ export async function POST(req: NextRequest) {
               categoryScores = Object.fromEntries(
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
               ) as Record<CategoryKey, 0|1|2|3|4>;
-              riskNote = result.data.riskNote;
+              riskNote = result.data.riskNote || "";
               isEducational = result.data.isEducational || false;
               
               // Apply educational modifier if content is educational
