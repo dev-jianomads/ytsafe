@@ -323,7 +323,7 @@ export async function POST(req: NextRequest) {
 
                 const retryText = retryCompletion.choices[0]?.message?.content ?? "{}";
                 const retryJsonMatch = retryText.match(/\{[\s\S]*\}/);
-                const retryJsonString = retryJsonMatch ? retryJsonString[0] : retryText;
+                const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
                 parsed = JSON.parse(retryJsonString);
               } catch (retryError) {
                 console.error(`JSON parsing failed for video ${videoId}:`, {
