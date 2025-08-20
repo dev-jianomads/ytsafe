@@ -106,6 +106,7 @@ export default function Home() {
         return `Analysis failed (${errorCode}). This could be due to API rate limits, network issues, or temporary service problems. Please try again later.`;
     }
   };
+  };
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
