@@ -6,11 +6,6 @@ import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments 
 import type { CategoryKey, PerVideoScore } from "@/types";
 import { trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
 
-// Ensure proper Next.js 13+ App Router API route export
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
-
 const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure. 
 
 Category definitions:
@@ -82,6 +77,11 @@ function calculateEngagementMetrics(
     audienceEngagement
   };
 }
+
+// Ensure proper Next.js 13+ App Router API route export
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   let requestBody: any = null;
