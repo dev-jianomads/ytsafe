@@ -465,6 +465,34 @@ export async function POST(req: NextRequest) {
               CATEGORIES.map(k => [k, Math.max(2, detectedCategories[k as CategoryKey])])
             ) as Record<CategoryKey, 0|1|2|3|4>;
             
+            // EDUCATIONAL INTENT DETECTION IN FALLBACK
+            const educationalKeywords = [
+              'tutorial', 'lesson', 'learn', 'education', 'educational', 'teaching',
+              'explained', 'how to', 'guide', 'documentary', 'awareness', 'science',
+              'history', 'math', 'physics', 'chemistry', 'biology', 'geography',
+              'literature', 'study', 'academic', 'university', 'school', 'course',
+              'lecture', 'professor', 'teacher', 'instructor', 'demonstration',
+              'experiment', 'research', 'analysis', 'theory', 'facts', 'information',
+              'knowledge', 'understanding', 'explanation', 'breakdown', 'overview'
+            ];
+            
+            const isEducationalFallback = educationalKeywords.some(keyword => 
+              content.toLowerCase().includes(keyword)
+            ) || 
+            // Check for educational patterns
+            /\b(how\s+to|step\s+by\s+step|tutorial|explained|lesson\s+\d+)\b/i.test(content) ||
+            // Check for academic/scientific language patterns
+            /\b(according\s+to|research\s+shows|studies\s+indicate|scientists|experts)\b/i.test(content);
+            
+            // Apply educational modifier to fallback scores
+            if (isEducationalFallback) {
+              console.log(`🎓 Educational content detected in fallback: ${title}`);
+              categoryScores = Object.fromEntries(
+                CATEGORIES.map(k => [k, Math.max(0, categoryScores[k] - 1)])
+              ) as Record<CategoryKey, 0|1|2|3|4>;
+              isEducational = true;
+            }
+            
             // Generate appropriate risk note
             const highestCategory = Object.entries(detectedCategories)
               .sort((a, b) => b[1] - a[1])[0];
