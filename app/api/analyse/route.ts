@@ -514,7 +514,7 @@ export async function POST(req: NextRequest) {
             } else {
               riskNote = "analysis failed";
             }
-            warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
+            warnings.push(`AI couldn't fully analyze "${video.snippet?.title || 'Unknown video'}" so we used conservative safety ratings based on keywords and video information. When in doubt, we err on the side of caution.`);
           }
 
           const maxScore = Math.max(...Object.values(categoryScores));
