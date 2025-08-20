@@ -39,11 +39,11 @@ export default function Home() {
       // Update loading message after a brief delay
       const messageTimer1 = setTimeout(() => {
         setLoadingMessage('Analysing content...');
-      }, 2000);
+      }, 5000);
       
       const messageTimer2 = setTimeout(() => {
         setLoadingMessage('Producing report...');
-      }, 5000);
+      }, 8000);
       const response = await fetch('/api/analyse', {
         method: 'POST',
         headers: {
