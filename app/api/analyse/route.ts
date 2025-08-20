@@ -548,7 +548,7 @@ export async function POST(req: NextRequest) {
       const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
       if (transcriptAvailabilityRate < 0.4) {
         const availablePercent = Math.round(transcriptAvailabilityRate * 100);
-        warnings.push(`Limited content analysis: Only ${availablePercent}% of videos had transcripts available. Ratings are based on titles, descriptions, comments, and engagement patterns only. This may result in less detailed content assessment since spoken content couldn't be evaluated.`);
+        warnings.push(`Limited analysis: Only ${availablePercent}% of videos had spoken content available for review. Safety ratings are based on video titles, descriptions, and viewer comments only. For the most accurate assessment, we recommend watching a few videos yourself.`);
       }
 
       // Aggregate scores
