@@ -17,7 +17,9 @@ Category definitions:
 - substances: Alcohol, drugs, smoking, vaping, substance abuse
 - gambling: Betting, casino games, loot boxes, gambling mechanics
 - sensitive_topics: Mental health, death/grief, family trauma, bullying, scary themes, political/religious controversy, identity discussions inappropriate for age
-- commercial_pressure: Sponsorships, product placement, aggressive sales tactics, influencer marketing targeting children, scams, deceptive advertising, financial cons, MLM schemes, fake product claims
+- commercial_pressure: Sponsorships, product placement, aggressive sales tactics, influencer marketing targeting children, scams, deceptive advertising, financial cons, MLM schemes, fake product claims`;
+
+const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and flags. Return JSON with: avgSentiment (positive/neutral/negative), communityFlags (array of strings like "inappropriate_language", "spam", "controversy", "harassment").`;
 
 function calculateEngagementMetrics(
   viewCount: number, 
@@ -192,7 +194,7 @@ export async function POST(req: NextRequest) {
           if (comments.length > 0) {
             const commentText = comments
               .slice(0, 8) // Reduced to top 8 comments
-              .map(c => `Comment (${c.likeCount} likes): ${c.text}`)
+              .map(c => \`Comment (${c.likeCount} likes): ${c.text}`)
               .join("\n");
             bundle += "\n\nTOP COMMENTS:\n" + commentText.slice(0, 1500); // Reduced token usage
           }
@@ -212,7 +214,7 @@ export async function POST(req: NextRequest) {
             try {
               const commentBundle = comments
                 .slice(0, 8) // Reduced comment analysis scope
-                .map(c => `${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
+                .map(c => \`${c.text} (${c.likeCount} likes, ${c.replyCount} replies)`)
                 .join("\n");
 
               const commentCompletion = await openai.chat.completions.create({
@@ -242,7 +244,7 @@ export async function POST(req: NextRequest) {
                 communityFlags: commentParsed.communityFlags || []
               };
             } catch (error) {
-              console.warn(`Comment analysis failed for video ${videoId}:`, error);
+              console.warn(\`Comment analysis failed for video ${videoId}:`, error);
             }
           }
 
@@ -265,7 +267,7 @@ export async function POST(req: NextRequest) {
               totalTokens += usage.total_tokens || 0;
               openaiRequestsCount++;
               
-              console.log(`OpenAI Token Usage for video ${videoId}:`, {
+              console.log(\`OpenAI Token Usage for video ${videoId}:`, {
                 prompt_tokens: usage.prompt_tokens,
                 completion_tokens: usage.completion_tokens,
                 total_tokens: usage.total_tokens,
@@ -303,7 +305,7 @@ export async function POST(req: NextRequest) {
                   totalTokens += retryUsage.total_tokens || 0;
                   openaiRequestsCount++;
                   
-                  console.log(`OpenAI Retry Token Usage for video ${videoId}:`, {
+                  console.log(\`OpenAI Retry Token Usage for video ${videoId}:`, {
                     prompt_tokens: retryUsage.prompt_tokens,
                     completion_tokens: retryUsage.completion_tokens,
                     total_tokens: retryUsage.total_tokens
@@ -315,7 +317,7 @@ export async function POST(req: NextRequest) {
                 const retryJsonString = retryJsonMatch ? retryJsonMatch[0] : retryText;
                 parsed = JSON.parse(retryJsonString);
               } catch (retryError) {
-                console.error(`JSON parsing failed for video ${videoId}:`, {
+                console.error(\`JSON parsing failed for video ${videoId}:`, {
                   originalResponse: responseText,
                   retryResponse: retryCompletion?.choices[0]?.message?.content || 'No retry response',
                   error: retryError
@@ -330,20 +332,12 @@ export async function POST(req: NextRequest) {
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
               ) as Record<CategoryKey, 0|1|2|3|4>;
               riskNote = result.data.riskNote;
-              
-              // Apply educational modifier if content is educational
-              if (result.data.isEducational) {
-                // Reduce scores by 1 point for educational content (minimum 0)
-                categoryScores = Object.fromEntries(
-                  CATEGORIES.map(k => [k, Math.max(0, categoryScores[k] - 1)])
-                ) as Record<CategoryKey, 0|1|2|3|4>;
-              }
             } else {
               throw new Error("Invalid classification response");
             }
           } catch (error) {
             // Fallback to conservative defaults
-            console.error(`OpenAI analysis failed for video ${videoId}:`, {
+            console.error(\`OpenAI analysis failed for video ${videoId}:`, {
               error: error instanceof Error ? error.message : 'Unknown error',
               videoTitle: video.snippet?.title,
               bundleLength: bundle.length
@@ -353,7 +347,7 @@ export async function POST(req: NextRequest) {
               CATEGORIES.map(k => [k, 1])
             ) as Record<CategoryKey, 0|1|2|3|4>;
             riskNote = "analysis failed";
-            warnings.push(`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
+            warnings.push(\`Content analysis failed for "${video.snippet?.title || 'Unknown video'}". Using conservative fallback ratings. This may be due to API rate limits or temporary service issues.`);
           }
 
           const maxScore = Math.max(...Object.values(categoryScores));
@@ -364,7 +358,7 @@ export async function POST(req: NextRequest) {
 
           return {
             videoId,
-            url: `https://www.youtube.com/watch?v=${videoId}`,
+            url: \`https://www.youtube.com/watch?v=${videoId}`,
             title: video.snippet?.title ?? "Untitled",
             publishedAt: video.snippet?.publishedAt ?? "",
             viewCount,
@@ -373,7 +367,6 @@ export async function POST(req: NextRequest) {
             engagementMetrics,
             categoryScores,
             riskNote: riskNote.slice(0, 64),
-            isEducational: result.success ? result.data.isEducational : undefined,
             commentAnalysis
           };
         });
@@ -387,7 +380,7 @@ export async function POST(req: NextRequest) {
       const transcriptAvailabilityRate = transcriptAvailable / totalVideos;
       if (transcriptAvailabilityRate < 0.4) {
         const availablePercent = Math.round(transcriptAvailabilityRate * 100);
-        warnings.push(`Limited content analysis: Only ${availablePercent}% of videos had transcripts available. Ratings are based on titles, descriptions, comments, and engagement patterns only. This may result in less detailed content assessment since spoken content couldn't be evaluated.`);
+        warnings.push(\`Limited content analysis: Only ${availablePercent}% of videos had transcripts available. Ratings are based on titles, descriptions, comments, and engagement patterns only. This may result in less detailed content assessment since spoken content couldn't be evaluated.`);
       }
 
       // Aggregate scores
