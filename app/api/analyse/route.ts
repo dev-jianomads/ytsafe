@@ -248,7 +248,24 @@ export async function POST(req: NextRequest) {
               }
 
               const commentResponseText = commentCompletion.choices[0]?.message?.content ?? "{}";
-              const commentParsed = JSON.parse(commentResponseText);
+              
+              // Extract JSON from response (handle markdown formatting)
+              let commentParsed: any = {};
+              try {
+                const commentJsonMatch = commentResponseText.match(/\{[\s\S]*\}/);
+                const commentJsonString = commentJsonMatch ? commentJsonMatch[0] : commentResponseText;
+                commentParsed = JSON.parse(commentJsonString);
+              } catch (parseError) {
+                console.warn(`Comment JSON parsing failed for video ${videoId}:`, {
+                  response: commentResponseText,
+                  error: parseError instanceof Error ? parseError.message : String(parseError)
+                });
+                // Use safe defaults
+                commentParsed = {
+                  avgSentiment: 'neutral',
+                  communityFlags: []
+                };
+              }
               
               commentAnalysis = {
                 totalComments: comments.length,
@@ -257,6 +274,12 @@ export async function POST(req: NextRequest) {
               };
             } catch (error) {
               console.warn(`Comment analysis failed for video ${videoId}:`, error);
+              // Ensure commentAnalysis is always defined
+              commentAnalysis = {
+                totalComments: comments.length,
+                avgSentiment: 'neutral',
+                communityFlags: []
+              };
             }
           }
 
