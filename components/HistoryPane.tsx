@@ -40,6 +40,7 @@ export function HistoryPane({ onSelectItem, isOpen, onClose }: HistoryPaneProps)
 
   const handleRefreshAnalysis = (query: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('🔄 Refreshing analysis for query:', query);
     onSelectItem(query);
     onClose();
   };

@@ -16,6 +16,13 @@ export function extractVideoId(url: string): string {
 export async function resolveChannelId(q: string, apiKey: string): Promise<string> {
   const query = q.trim();
   
+  console.log('🔍 Resolving channel ID for query:', {
+    original: q,
+    trimmed: query,
+    length: query.length,
+    type: typeof query
+  });
+  
   // Handle @name format
   if (/^@[\w.-]+$/.test(query)) {
     const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');

@@ -84,6 +84,7 @@ export default function Home() {
   };
 
   const handleSelectFromHistory = (historicalQuery: string) => {
+    console.log('📋 Selected from history:', historicalQuery);
     setQuery(historicalQuery);
     handleAnalyse(historicalQuery);
     setIsHistoryOpen(false);
