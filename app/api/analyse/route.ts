@@ -203,7 +203,6 @@ export async function POST(req: NextRequest) {
           let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
           let riskNote = "";
           let commentAnalysis: any = undefined;
-          let result: any = { success: false };
           
           // Calculate engagement metrics
           const engagementMetrics = calculateEngagementMetrics(
@@ -327,7 +326,7 @@ export async function POST(req: NextRequest) {
             }
 
             // Validate and sanitize scores
-            result = VideoScoreSchema.safeParse(parsed);
+            const result = VideoScoreSchema.safeParse(parsed);
             if (result.success) {
               categoryScores = Object.fromEntries(
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
@@ -376,7 +375,6 @@ export async function POST(req: NextRequest) {
             engagementMetrics,
             categoryScores,
             riskNote: riskNote.slice(0, 64),
-            isEducational: result.success ? result.data.isEducational : undefined,
             commentAnalysis
           };
         });
