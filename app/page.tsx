@@ -43,7 +43,7 @@ export default function Home() {
       
       const messageTimer2 = setTimeout(() => {
         setLoadingMessage('Producing report...');
-      }, 8000);
+      }, 10000);
       const response = await fetch('/api/analyse', {
         method: 'POST',
         headers: {
