@@ -21,7 +21,7 @@ interface SummaryCardProps {
   };
   videos?: Array<{
     title: string;
-    riskNote: string;
+    riskNotes: string[];
     categoryScores: Record<string, number>;
   }>;
 }
@@ -101,7 +101,8 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
         const riskIcon = maxScore <= 1 ? '✓' : maxScore === 2 ? '⚠️' : '🔴';
         const truncatedTitle = video.title.length > 50 ? 
           video.title.substring(0, 47) + '...' : video.title;
-        shareText += `${riskIcon} "${truncatedTitle}" - ${video.riskNote}\n`;
+        const riskSummary = video.riskNotes.join(', ');
+        shareText += `${riskIcon} "${truncatedTitle}" - ${riskSummary}\n`;
       });
       
       if (videos.length > 5) {

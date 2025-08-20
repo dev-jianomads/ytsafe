@@ -105,8 +105,18 @@ export function VideoList({ videos }: VideoListProps) {
                     variant="secondary" 
                     className="text-xs whitespace-nowrap self-start sm:self-auto"
                   >
-                    {video.riskNote}
+                    {video.riskNotes[0]}
                   </Badge>
+                  
+                  {video.riskNotes.slice(1).map((note, idx) => (
+                    <Badge 
+                      key={idx}
+                      variant="secondary" 
+                      className="text-xs whitespace-nowrap self-start sm:self-auto"
+                    >
+                      {note}
+                    </Badge>
+                  ))}
                   
                   {video.isEducational && (
                     <Badge 

@@ -6,7 +6,7 @@ import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments 
 import type { CategoryKey, PerVideoScore } from "@/types";
 import { trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
 
-const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure. 
+const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure.
 
 Category definitions:
 - violence: Physical aggression, fighting, weapons, graphic injury
@@ -23,7 +23,9 @@ Educational Intent Detection:
 - Consider the intent: Educational/awareness = lower score, Entertainment/sensational = higher score, Promotional/exploitative = highest score
 - Evaluate HOW topics are presented: Clinical/educational tone = lower risk, Sensationalized/dramatic = higher risk, Age-appropriate explanations = lower risk
 
-Additional field: isEducational (boolean) - true if content appears to be primarily educational/documentary in nature with responsible presentation of topics.`;
+Additional fields: 
+- isEducational (boolean) - true if content appears to be primarily educational/documentary in nature with responsible presentation of topics
+- riskNotes (array of 1-3 strings, max 32 chars each) - the most important risk factors for parents, based on highest-scoring categories. Examples: ["gaming violence", "mild language"], ["gambling content"], ["educational discussion", "sensitive topics"]`;
 
 const COMMENT_ANALYSIS_PROMPT = `Analyze these YouTube comments for community sentiment and flags. Return JSON with: avgSentiment (positive/neutral/negative), communityFlags (array of strings like "inappropriate language", "spam", "controversy", "harassment").`;
 
@@ -213,7 +215,7 @@ export async function POST(req: NextRequest) {
 
           // Classify with OpenAI
           let categoryScores: Record<CategoryKey, 0|1|2|3|4>;
-          let riskNote = "";
+          let riskNotes: string[] = [];
           let commentAnalysis: any = undefined;
           let isEducational = false;
           
@@ -367,7 +369,7 @@ export async function POST(req: NextRequest) {
               categoryScores = Object.fromEntries(
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
               ) as Record<CategoryKey, 0|1|2|3|4>;
-              riskNote = result.data.riskNote || "";
+              riskNotes = result.data.riskNotes || [];
               isEducational = result.data.isEducational || false;
               
               // Apply educational modifier if content is educational
@@ -541,17 +543,18 @@ export async function POST(req: NextRequest) {
                 sensitive_topics: 'sensitive topics',
                 commercial_pressure: 'commercial pressure'
               };
-              riskNote = categoryNames[highestCategory[0]] || 'analysis failed';
+              riskNotes = [categoryNames[highestCategory[0]] || 'analysis failed'];
             } else {
-              riskNote = "analysis failed";
+              riskNotes = ["analysis failed"];
             }
             analysisFailureCount++;
           }
 
           const maxScore = Math.max(...Object.values(categoryScores));
-          if (!riskNote) {
-            riskNote = maxScore >= 3 ? "strong content" : 
-                      maxScore === 2 ? "moderate content" : "mild content";
+          if (riskNotes.length === 0) {
+            const fallbackNote = maxScore >= 3 ? "strong content" : 
+                                maxScore === 2 ? "moderate content" : "mild content";
+            riskNotes = [fallbackNote];
           }
 
           return {
@@ -564,7 +567,7 @@ export async function POST(req: NextRequest) {
             commentCount,
             engagementMetrics,
             categoryScores,
-            riskNote: riskNote.slice(0, 64),
+            riskNotes: riskNotes.map(note => note.slice(0, 32)),
             isEducational,
             commentAnalysis
           };
