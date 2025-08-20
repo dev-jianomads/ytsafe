@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
       // Get channel info and recent videos
       const [channelInfo, videoIds] = await Promise.all([
         getChannelInfo(channelId, YT),
-        listRecentVideoIds(channelId, YT, 8) // Reduced from 10 to 8 videos
+        listRecentVideoIds(channelId, YT, 5) // Reduced from 8 to 5 videos
       ]);
 
       if (videoIds.length === 0) {
