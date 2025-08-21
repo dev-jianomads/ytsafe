@@ -61,7 +61,7 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
           <Input
             type="text"
-            placeholder="YouTube channel/video URL or @handle"
+            placeholder="Channel name, @handle, or any YouTube URL"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={isLoading}
@@ -86,6 +86,13 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
           )}
         </Button>
       </form>
+      
+      {/* Helper text for parents */}
+      <div className="mt-2 text-center">
+        <p className="text-xs text-gray-500">
+          <span className="font-medium">💡 Tip:</span> Just type the channel name (like "MrBeast") - no need to find the exact @handle or URL!
+        </p>
+      </div>
     </div>
   );
 }
