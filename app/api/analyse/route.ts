@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { YoutubeTranscript } from "youtube-transcript";
 import OpenAI from "openai";
 import { ageFromScores, deriveBullets, makeVerdict, VideoScoreSchema, CATEGORIES } from "@/lib/rating";
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
     requestBody = await req.json();
     const { q } = requestBody;
     parsedQuery = q;
-    const userAgent = req.headers.get('user-agent') || undefined;
+    const userAgent = headers().get('user-agent') || undefined;
     
     // Track token usage across all OpenAI calls
     let totalPromptTokens = 0;
@@ -673,7 +674,7 @@ export async function POST(req: NextRequest) {
     console.error('Analysis error:', error);
     
     // Track failed analysis
-    const userAgent = req.headers.get('user-agent') || undefined;
+    const userAgent = headers().get('user-agent') || undefined;
     
     console.log('❌ Tracking failed analysis:', {
       query: parsedQuery,
