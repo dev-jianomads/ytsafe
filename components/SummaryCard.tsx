@@ -245,7 +245,15 @@ T (Ages 11-15): All categories ≤ 3
 • Recent video titles and descriptions
 • Video transcripts (when available)
 • Top community comments
-• Engagement patterns and controversy indicators
+• Engagement patterns and controversy indicators`;
+
+    try {
+      await navigator.clipboard.writeText(guideText);
+      toast.success('Rating guide copied to clipboard!', {
+        description: 'Share this comprehensive guide with other parents.',
+        duration: 3000,
+      });
+    } catch (error) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = guideText;
