@@ -343,7 +343,7 @@ T (Ages 11-15): All categories ≤ 3
             <div className="sm:hidden">
               <h3 className="font-semibold text-gray-900 text-lg">{channel.title}</h3>
               {channel.handle && (
-                <p className="text-sm text-gray-500">{channel.handle}</p>
+                <p className="text-sm text-gray-500">{channel.handle.startsWith('@') ? channel.handle : `@${channel.handle}`}</p>
               )}
             </div>
           )}
@@ -360,7 +360,7 @@ T (Ages 11-15): All categories ≤ 3
               <div className="hidden sm:block">
                 <h3 className="font-semibold text-gray-900">{channel.title}</h3>
                 {channel.handle && (
-                  <p className="text-sm text-gray-500">{channel.handle}</p>
+                  <p className="text-sm text-gray-500">{channel.handle.startsWith('@') ? channel.handle : `@${channel.handle}`}</p>
                 )}
               </div>
             )}
