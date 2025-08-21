@@ -145,15 +145,6 @@ ${'='.repeat(60)}
 
 We analyze YouTube content using the same categories as video game ratings, but adapted for online video content. Each video gets scored 0-4 in seven key areas, then we calculate an overall age recommendation.
 
-📚 Educational Content Protection
-Our system recognizes educational intent and automatically reduces scores by 1 point across all categories for genuinely educational content. This means:
-• Science experiments discussing "dangerous" chemicals get lower scores
-• History lessons about wars/conflicts aren't over-penalized  
-• Health education about mental health topics is protected
-• STEM content with sensitive topics gets fair treatment
-
-Educational content gets a special 🎓 badge to help parents identify learning opportunities.
-
 📊 Complete Rating Categories & Coverage:
 
 1. 🥊 VIOLENCE
