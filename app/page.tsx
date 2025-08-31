@@ -283,18 +283,13 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-            <h1 className="text-2xl font-bold text-gray-900">StreamSafe Kids</h1>
-            <p className="text-sm text-gray-600">ESRB age ratings for any YouTube channel—clear, fast, parent-friendly</p>
+                <h1 className="text-2xl font-bold text-gray-900">StreamSafe Kids</h1>
+                <p className="text-sm text-gray-600">ESRB age ratings for any YouTube channel—clear, fast, parent-friendly</p>
+              </Card>
+            )}
           </div>
         </div>
       </div>
-      
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t py-6 px-4 text-center">
-        <p className="text-sm text-gray-600">
-          Not affiliated with YouTube or any video platform.
-        </p>
-      </footer>
       
       {/* Feedback Modal */}
       <FeedbackModal
