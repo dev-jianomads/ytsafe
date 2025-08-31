@@ -45,13 +45,14 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
           <Menu className="h-4 w-4" />
         </Button>
         <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Children-Safety Reviewer</h1>
+        <h1 className="text-lg font-semibold text-gray-900 truncate">StreamSafe Kids</h1>
       </div>
 
       {/* Promotional Banner */}
       <div className="mb-4 flex justify-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-full text-sm font-medium shadow-lg">
           <Sparkles className="h-4 w-4" />
-          <span className="hidden sm:inline">Free and no sign-in required - just copy and paste YouTube URL or @handle</span>
+          <span className="hidden sm:inline">ESRB age ratings for any YouTube channel—clear, fast, parent-friendly</span>
           <span className="sm:hidden">Free - no sign-in required</span>
         </div>
       </div>
@@ -79,10 +80,7 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
               {loadingMessage || 'Processing...'}
             </span>
           ) : (
-            <>
-              <span className="hidden sm:inline">Analyse</span>
-              <span className="sm:hidden">Go</span>
-            </>
+            "Check a Channel"
           )}
         </Button>
       </form>

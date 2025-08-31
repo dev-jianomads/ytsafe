@@ -283,8 +283,8 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-              </Card>
-            )}
+            <h1 className="text-2xl font-bold text-gray-900">StreamSafe Kids</h1>
+            <p className="text-sm text-gray-600">ESRB age ratings for any YouTube channel—clear, fast, parent-friendly</p>
           </div>
         </div>
       </div>

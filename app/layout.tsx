@@ -6,8 +6,8 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'YouTube Children-Safety Reviewer',
-  description: 'ESRB-style content analysis for YouTube channels and videos to help parents make informed decisions about family-friendly viewing.',
+  title: 'StreamSafe Kids - ESRB Age Ratings for YouTube Channels',
+  description: 'ESRB age ratings for any YouTube channel—clear, fast, parent-friendly. Get instant safety analysis to help parents make informed decisions about family-friendly viewing.',
 };
 
 export default function RootLayout({

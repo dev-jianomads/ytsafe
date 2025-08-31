@@ -112,7 +112,7 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
     
     // Footer
     shareText += `\n---\n`;
-    shareText += `Analysis by YouTube Children-Safety Reviewer\n`;
+    shareText += `Analysis by StreamSafe Kids\n`;
     shareText += `Always preview content yourself and consider your child's individual maturity level.`;
     
     try {
