@@ -1,8 +1,8 @@
-# YTSafe - YouTube Kid-Safety Rater
+# StreamSafe Kids - ESRB Age Ratings for YouTube Channels
 
-🛡️ An ESRB-style content analysis tool for YouTube channels and videos to help parents make informed decisions about family-friendly viewing.
+🛡️ ESRB age ratings for any YouTube channel—clear, fast, parent-friendly. Help parents make informed decisions about family-friendly viewing.
 
-**Live Demo**: [Visit YTSafe](https://ytsafe-dev-jianomads.vercel.app)
+**Live Demo**: [Visit StreamSafe Kids](https://streamsafekids.com)
 
 ## Features
 
@@ -14,11 +14,11 @@
 
 ## Quick Start
 
-Simply paste any YouTube channel URL, video URL, or @handle into the search bar to get an instant safety rating!
+Simply type any YouTube channel name, paste a URL, or use an @handle to get an instant ESRB-style safety rating!
 
 ## How It Works
 
-1. Enter a YouTube channel URL, video URL, or @handle
+1. Enter a YouTube channel name, URL, video URL, or @handle
 2. The system analyzes recent videos using AI-powered content classification
 3. Receive an ESRB-style rating with detailed breakdown
 4. Make informed decisions about content suitability for your family
