@@ -44,7 +44,6 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
         >
           <Menu className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg font-semibold text-gray-900 truncate">YouTube Children-Safety Reviewer</h1>
         <h1 className="text-lg font-semibold text-gray-900 truncate">StreamSafe Kids</h1>
       </div>
 
