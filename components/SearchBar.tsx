@@ -83,15 +83,6 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
           )}
         </Button>
       </form>
-      
-      {/* Helper text for parents */}
-      <div className="mt-2 text-center">
-        <p
-          className="text-xs text-gray-500"
-        >
-          Enter any YouTube channel name, @handle, or URL to get instant safety ratings
-        </p>
-      </div>
     </div>
   );
 }
