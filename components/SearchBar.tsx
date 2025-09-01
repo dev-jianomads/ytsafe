@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, Sparkles } from 'lucide-react';
+import { Search, Menu, Sparkles, Heart } from 'lucide-react';
 
 interface SearchBarProps {
   onAnalyse: (query: string) => void;
