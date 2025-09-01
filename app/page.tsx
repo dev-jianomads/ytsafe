@@ -125,8 +125,8 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <Heart className="h-8 w-8 text-pink-500" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">YouTube Children-Safety Reviewer</h1>
-                <p className="text-sm text-gray-600">ESRB-style content analysis for family-friendly viewing</p>
+                <h1 className="text-2xl font-bold text-gray-900">StreamSafe Kids</h1>
+                <p className="text-sm text-gray-600">Age ratings for any YouTube channel—clear, fast, parent-friendly</p>
               </div>
             </div>
           </div>
@@ -292,7 +292,7 @@ export default function Home() {
       </div>
       
       {/* Footer */}
-      <footer className="bg-gray-50 border-t py-6 px-4 text-center">
+      <footer className="bg-gray-50 border-t py-6 px-4 text-center mt-auto">
         <p className="text-sm text-gray-600">
           Not affiliated with YouTube or any video platform.
         </p>
