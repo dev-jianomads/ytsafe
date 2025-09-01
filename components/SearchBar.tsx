@@ -44,7 +44,13 @@ export function SearchBar({ onAnalyse, isLoading, loadingMessage, initialQuery =
         >
           <Menu className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg font-semibold text-gray-900 truncate">StreamSafe Kids</h1>
+        <div className="flex items-center gap-2 min-w-0">
+          <Heart className="h-6 w-6 text-pink-500 flex-shrink-0" />
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold text-gray-900 truncate">StreamSafe Kids</h1>
+            <p className="text-xs text-gray-600 truncate">ESRB Age ratings for YouTube channels</p>
+          </div>
+        </div>
       </div>
 
       {/* Promotional Banner */}
