@@ -142,7 +142,7 @@ export async function getChannelInfo(channelId: string, apiKey: string) {
   return {
     id: channel?.id,
     title: channel?.snippet?.title,
-    handle: channel?.snippet?.customUrl ? `@${channel.snippet.customUrl}` : undefined,
+    handle: channel?.snippet?.customUrl ? (channel.snippet.customUrl.startsWith('@') ? channel.snippet.customUrl : `@${channel.snippet.customUrl}`) : undefined,
     thumbnail: channel?.snippet?.thumbnails?.default?.url
   };
 }
