@@ -126,7 +126,7 @@ export default function Home() {
               <Heart className="h-8 w-8 text-pink-500" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">StreamSafe Kids</h1>
-                <p className="text-sm text-gray-600">Age ratings for any YouTube channel—clear, fast, parent-friendly</p>
+                <p className="text-sm text-gray-600">ESRB Age ratings for any YouTube channel—clear, fast, parent-friendly</p>
               </div>
             </div>
           </div>
