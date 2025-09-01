@@ -112,7 +112,7 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
     
     // Footer
     shareText += `\n---\n`;
-    shareText += `Analysis by StreamSafe Kids\n`;
+    shareText += `Analysis by StreamSafe Kids - ESRB Age Ratings for YouTube\n`;
     shareText += `Always preview content yourself and consider your child's individual maturity level.`;
     
     try {
@@ -138,12 +138,12 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
   };
 
   const handleShareGuide = async () => {
-    const guideText = `YouTube Children-Safety Reviewer - Complete Rating Guide
+    const guideText = `StreamSafe Kids - Complete ESRB Rating Guide for YouTube
 ${'='.repeat(60)}
 
-🎯 How Our ESRB-Style Rating System Works
+🎯 ESRB Age Ratings for YouTube Channels - How It Works
 
-We analyze YouTube content using the same categories as video game ratings, but adapted for online video content. Each video gets scored 0-4 in seven key areas, then we calculate an overall age recommendation.
+StreamSafe Kids analyzes YouTube content using the same ESRB categories as video game ratings, but adapted for online video content. Each video gets scored 0-4 in seven key areas, then we calculate an overall age recommendation.
 
 📊 Complete Rating Categories & Coverage:
 
