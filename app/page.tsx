@@ -10,7 +10,7 @@ import { CategoryTable } from '@/components/CategoryTable';
 import { VideoList } from '@/components/VideoList';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Heart } from 'lucide-react';
+import { AlertTriangle, Heart, Shield, Brain, GraduationCap, FileText } from 'lucide-react';
 import type { AnalyseResponse, HistoryItem } from '@/types';
 import { saveToHistory } from '@/lib/history';
 import { incrementSearchCount } from '@/lib/session';
@@ -225,45 +225,53 @@ export default function Home() {
                 <div className="p-6 bg-green-50 rounded-lg border border-green-200 text-left max-w-2xl mx-auto">
                   <h4 className="text-lg font-semibold text-green-900 mb-4 text-center">Why Trust StreamSafe Kids?</h4>
                   
-                  <div className="space-y-4 text-sm text-green-800">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">✓</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Shield className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <h5 className="font-semibold text-gray-900">ESRB-Standard Analysis</h5>
                       </div>
-                      <div>
-                        <p className="font-medium mb-1">ESRB-Standard Analysis</p>
-                        <p className="text-green-700">We use the same content categories and rating methodology as video game ratings, adapted for YouTube content.</p>
-                      </div>
+                      <p className="text-sm text-gray-700">
+                        We use the same content categories and rating methodology as video game ratings, adapted for YouTube content.
+                      </p>
                     </div>
                     
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">✓</span>
+                    <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Brain className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <h5 className="font-semibold text-gray-900">AI-Powered Content Review</h5>
                       </div>
-                      <div>
-                        <p className="font-medium mb-1">AI-Powered Content Review</p>
-                        <p className="text-green-700">Our analysis reviews actual video transcripts and community responses, not just metadata, for accurate safety assessments.</p>
-                      </div>
+                      <p className="text-sm text-gray-700">
+                        Our analysis reviews actual video transcripts and community responses, not just metadata, for accurate safety assessments.
+                      </p>
                     </div>
                     
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">✓</span>
+                    <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                          <GraduationCap className="h-5 w-5 text-emerald-600" />
+                        </div>
+                        <h5 className="font-semibold text-gray-900">Educational Content Protection</h5>
                       </div>
-                      <div>
-                        <p className="font-medium mb-1">Educational Content Protection</p>
-                        <p className="text-green-700">We recognize educational intent and adjust ratings fairly, so learning content isn't unfairly penalized for discussing sensitive topics.</p>
-                      </div>
+                      <p className="text-sm text-gray-700">
+                        We recognize educational intent and adjust ratings fairly, so learning content isn't unfairly penalized for discussing sensitive topics.
+                      </p>
                     </div>
                     
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">✓</span>
+                    <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <h5 className="font-semibold text-gray-900">Transparent & Actionable Results</h5>
                       </div>
-                      <div>
-                        <p className="font-medium mb-1">Transparent & Actionable Results</p>
-                        <p className="text-green-700">We show you exactly why content received its rating with specific examples, risk factors, and clear next steps for parents.</p>
-                      </div>
+                      <p className="text-sm text-gray-700">
+                        We show you exactly why content received its rating with specific examples, risk factors, and clear next steps for parents.
+                      </p>
                     </div>
                   </div>
                   
