@@ -123,6 +123,22 @@ export default function HowItWorksPage() {
             <BarChart3 className="h-6 w-6 text-green-600" />
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Content Categories Explained</h2>
           </div>
+          <div className="flex items-center gap-3 mb-4">
+            <Shield className="h-6 w-6 text-green-600" />
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">ESRB Age Rating System</h2>
+          </div>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            <a 
+              href="https://www.esrb.org" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-medium text-blue-600 hover:text-blue-800 underline"
+            >
+              ESRB ratings
+            </a>{' '}
+            provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family. We apply the same methodology to YouTube content.
+          </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[

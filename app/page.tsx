@@ -236,6 +236,14 @@ export default function Home() {
                       <p className="text-sm text-gray-700">
                         We use the same content categories and rating methodology as video game ratings, adapted for YouTube content.
                       </p>
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <a 
+                          href="/how-it-works" 
+                          className="text-sm text-blue-600 hover:text-blue-800 underline font-medium"
+                        >
+                          See detailed rating categories →
+                        </a>
+                      </div>
                     </div>
                     
                     <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow">
@@ -275,51 +283,6 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  {/* Learn More Link */}
-                  <div className="mt-4 text-center">
-                    <a 
-                      href="/how-it-works" 
-                      className="text-sm text-green-600 hover:text-green-800 underline font-medium"
-                    >
-                      Learn more about our detailed analysis process →
-                    </a>
-                  </div>
-                  
-                  {/* Complete Rating Categories & Coverage Section */}
-                  <div className="mt-6 p-4 bg-white rounded-lg border border-green-100">
-                    <p className="text-sm text-green-800 leading-relaxed mb-4">
-                      <a 
-                        href="https://www.esrb.org" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="font-medium text-green-600 hover:text-green-800 underline"
-                      >
-                        ESRB ratings
-                      </a>{' '}
-                      provide information about what's in a game or app so parents and consumers can make informed choices about which games are right for their family.
-                    </p>
-                    
-                    <h5 className="font-semibold text-green-900 mb-2">Rating Categories (Just Like Video Games)</h5>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-5 bg-green-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">E</div>
-                        <span className="text-green-700">Ages 6 and under</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-5 bg-emerald-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">E10+</div>
-                        <span className="text-green-700">Ages 7-10</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-5 bg-amber-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">T</div>
-                        <span className="text-green-700">Ages 11-15</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-5 bg-red-500 rounded text-white text-center text-xs font-bold flex items-center justify-center">16+</div>
-                        <span className="text-green-700">Ages 16 and up</span>
-                      </div>
-                    </div>
-                  </div>
-                  
                   {/* Educational Content Protection Section */}
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                     <h6 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
@@ -329,6 +292,16 @@ export default function Home() {
                     <p className="text-xs text-blue-800 leading-relaxed">
                       Our system recognizes educational intent and automatically reduces scores by 1 point across all categories for genuinely educational content. This means science experiments discussing "dangerous" chemicals, history lessons about wars, or health education about mental health topics get fair treatment and aren't over-penalized.
                     </p>
+                  </div>
+                  
+                  {/* Learn More Link */}
+                  <div className="mt-4 text-center">
+                    <a 
+                      href="/how-it-works" 
+                      className="text-sm text-green-600 hover:text-green-800 underline font-medium"
+                    >
+                      Learn more about our detailed analysis process →
+                    </a>
                   </div>
                 </div>
               </Card>
