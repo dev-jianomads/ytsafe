@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://streamsafekids.com/sitemap.xml
+
+# Important pages for crawling
+Allow: /
+Allow: /about
+Allow: /how-it-works
+Allow: /parent-guide
+
+# Block any admin or API routes
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# Crawl delay (optional - helps with server load)
+Crawl-delay: 1

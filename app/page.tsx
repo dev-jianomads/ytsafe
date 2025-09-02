@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Head from 'next/head';
 import { SearchBar } from '@/components/SearchBar';
 import { HistoryPane } from '@/components/HistoryPane';
 import { FeedbackModal } from '@/components/FeedbackModal';
@@ -109,6 +110,35 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "StreamSafe Kids",
+              "description": "ESRB-style age ratings for YouTube channels. Free safety analysis tool helps parents make informed decisions about family-friendly viewing.",
+              "url": "https://streamsafekids.com",
+              "applicationCategory": "ParentalControlApplication",
+              "operatingSystem": "Web Browser",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "creator": {
+                "@type": "Organization",
+                "name": "StreamSafe Kids"
+              },
+              "audience": {
+                "@type": "Audience",
+                "audienceType": "Parents"
+              }
+            })
+          }}
+        />
+      </Head>
       <div className="flex lg:grid lg:grid-cols-[320px_1fr] relative">
         {/* History Sidebar */}
         <HistoryPane 
