@@ -7,7 +7,13 @@ import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments 
 import type { CategoryKey, PerVideoScore } from "@/types";
 import { trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
 
-const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category integer scores from 0 (none) to 4 (extreme) for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure.
+const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category decimal scores from 0-4 for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure.
+
+Scoring scale (use decimals for precision):
+- 0-1: None to Mild - No content or brief/minor mentions that don't dominate the video
+- >1-2: Moderate - Some concerning elements present, occasional throughout video
+- >2-3: Strong - Frequent concerning content, significant presence in video
+- >3-4: Extreme - Dominant concerning themes, primary focus of content
 
 Category definitions:
 - violence: Physical aggression, fighting, weapons, graphic injury
