@@ -185,7 +185,7 @@ export default function HowItWorksPage() {
           <ul className="space-y-2 text-blue-800">
             <li className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
-              Science experiments discussing "dangerous" chemicals get fair treatment
+              Science experiments discussing "dangerous\" chemicals get fair treatment
             </li>
             <li className="flex items-start gap-2">
               <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
