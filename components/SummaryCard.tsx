@@ -2,8 +2,10 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AlertTriangle, Share, ExternalLink, BookOpen } from 'lucide-react';
+import { AlertTriangle, Share, ExternalLink, BookOpen, Shield, Ban } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { ParentResourcesModal } from './ParentResourcesModal';
 import type { Aggregate } from '@/types';
 
 interface SummaryCardProps {
@@ -27,6 +29,8 @@ interface SummaryCardProps {
 }
 
 export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: SummaryCardProps) {
+  const [showParentResources, setShowParentResources] = useState(false);
+
   const getAgeBadgeColor = (ageBand: string) => {
     switch (ageBand) {
       case 'E': return 'bg-green-500 text-white hover:bg-green-600';
@@ -260,6 +264,45 @@ T (Ages 11-15): All categories ≤ 3
     }
   };
 
+  const handleBlockChannel = () => {
+    if (!channel?.handle) return;
+    
+    const cleanHandle = channel.handle.replace(/^@+/, '');
+    const instructions = `To block ${channel.title || 'this channel'}:
+
+📱 YouTube Kids App (Recommended):
+1. Find any video from ${channel.title || 'the channel'}
+2. Tap the 3-dot menu
+3. Select "Block this channel"
+4. Confirm
+
+🔗 Family Link Supervised YouTube:
+1. Go to: https://www.youtube.com/@${cleanHandle}
+2. Click "About" tab
+3. Click flag icon → "Report user"
+4. Select "Block channel for children"
+5. Choose which child to block for
+
+⚠️ Note: Regular YouTube's Restricted Mode cannot block specific channels.`;
+
+    try {
+      navigator.clipboard.writeText(instructions);
+      toast.success('Blocking instructions copied!', {
+        description: 'Paste these step-by-step instructions anywhere.',
+        duration: 4000,
+      });
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = instructions;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      toast.success('Blocking instructions copied!');
+    }
+  };
+
   const handleViewChannel = () => {
     if (channel?.handle) {
       // Clean the handle - remove any existing @ symbols, then add our own
@@ -289,13 +332,16 @@ T (Ages 11-15): All categories ≤ 3
     }
   };
 
+  const isHighRisk = aggregate.ageBand === '16+' || aggregate.ageBand === 'T';
+
   return (
-    <Card className="p-4 sm:p-6 mb-6">
+    <>
+      <Card className="p-4 sm:p-6 mb-6">
       <div className="flex justify-between items-start gap-3 mb-4">
         <div className="flex-1 min-w-0">
           {/* Existing content will go here */}
         </div>
-        <div className="flex gap-2 flex-shrink-0">
+        <div className="flex flex-wrap gap-2 flex-shrink-0">
           {channel?.handle && (
             <Button
               onClick={handleViewChannel}
@@ -308,6 +354,32 @@ T (Ages 11-15): All categories ≤ 3
               <span className="sm:hidden">Channel</span>
             </Button>
           )}
+          
+          {/* Contextual Action Buttons */}
+          {isHighRisk && channel?.handle && (
+            <Button
+              onClick={handleBlockChannel}
+              variant="outline"
+              size="sm"
+              className="gap-2 border-red-200 text-red-700 hover:bg-red-50"
+            >
+              <Ban className="h-4 w-4" />
+              <span className="hidden sm:inline">Block Channel</span>
+              <span className="sm:hidden">Block</span>
+            </Button>
+          )}
+          
+          <Button
+            onClick={() => setShowParentResources(true)}
+            variant="outline"
+            size="sm"
+            className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Parent Resources</span>
+            <span className="sm:hidden">Resources</span>
+          </Button>
+          
           <Button
             onClick={handleShareGuide}
             variant="outline"
@@ -318,6 +390,7 @@ T (Ages 11-15): All categories ≤ 3
             <span className="hidden sm:inline">Share Guide</span>
             <span className="sm:hidden">Guide</span>
           </Button>
+          
           <Button
             onClick={handleShare}
             variant="outline"
@@ -383,6 +456,15 @@ T (Ages 11-15): All categories ≤ 3
           </div>
         </div>
       </div>
-    </Card>
+      </Card>
+      
+      {/* Parent Resources Modal */}
+      <ParentResourcesModal
+        isOpen={showParentResources}
+        onClose={() => setShowParentResources(false)}
+        channelName={channel?.title}
+        ageBand={aggregate.ageBand}
+      />
+    </>
   );
 }
