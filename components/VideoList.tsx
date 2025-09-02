@@ -9,9 +9,10 @@ interface VideoListProps {
 
 export function VideoList({ videos }: VideoListProps) {
   const getRiskColor = (maxScore: number) => {
-    if (maxScore <= 1) return 'bg-green-500';
-    if (maxScore === 2) return 'bg-amber-500';
-    return 'bg-red-500';
+    if (maxScore <= 1.5) return 'bg-green-500';    // Green: None/Mild
+    if (maxScore <= 2.5) return 'bg-amber-500';    // Yellow: Moderate  
+    if (maxScore <= 3.5) return 'bg-orange-500';   // Orange: Strong
+    return 'bg-red-500';                           // Red: Extreme
   };
 
   const formatDate = (dateString: string) => {
