@@ -30,9 +30,10 @@ export function deriveBullets(scores: Record<CategoryKey, number>): string[] {
     .slice(0, 3)
     .map(([k, v]) => {
       const label = labels[k as CategoryKey];
-      if (v <= 1) return `little to no ${label}`;
-      if (v <= 2) return `some ${label}`;
-      if (v <= 3) return `frequent ${label}`;
+      if (v <= 0.5) return `little to no ${label}`;
+      if (v <= 1.5) return `mild ${label}`;
+      if (v <= 2.5) return `moderate ${label}`;
+      if (v <= 3.5) return `frequent ${label}`;
       return `strong ${label}`;
     });
 }
