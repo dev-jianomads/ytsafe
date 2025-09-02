@@ -63,9 +63,9 @@ export default function HowItWorksPage() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Channel Discovery</h3>
                 <p className="text-gray-700 mb-2">
-                  When you enter a channel name, @handle, or YouTube URL, we use the YouTube Data API to identify the channel and fetch information about their recent videos.
+                  When you enter a channel name, @handle, or YouTube URL, we integrate with YouTube officially to identify the channel and fetch information about their recent videos. This ensures our data is accurate and timely.
                 </p>
-                <Badge variant="outline" className="text-xs">YouTube Data API v3</Badge>
+                <Badge variant="outline" className="text-xs">Official YouTube Integration</Badge>
               </div>
             </div>
 
