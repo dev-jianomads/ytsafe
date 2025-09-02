@@ -38,10 +38,10 @@ export default function ParentGuidePage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-green-50 border-b">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
             <Heart className="h-8 w-8 text-pink-500" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Complete Parent Guide</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Complete Parent Guide</h1>
               <p className="text-gray-600">Everything you need to know about YouTube safety for kids</p>
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function ParentGuidePage() {
         <Card className="p-6 border-green-200 bg-green-50">
           <div className="flex items-center gap-3 mb-4">
             <CheckCircle className="h-6 w-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-green-900">Quick Start: Safer YouTube in 5 Minutes</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-green-900">Quick Start: Safer YouTube in 5 Minutes</h2>
           </div>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -88,7 +88,7 @@ export default function ParentGuidePage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <Shield className="h-6 w-6 text-red-600" />
-            <h2 className="text-2xl font-bold text-gray-900">How to Block YouTube Channels</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">How to Block YouTube Channels</h2>
           </div>
 
           <div className="space-y-6">
@@ -156,7 +156,7 @@ export default function ParentGuidePage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <Users className="h-6 w-6 text-purple-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Age-Specific Viewing Guidance</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Age-Specific Viewing Guidance</h2>
           </div>
           
           <div className="space-y-4">
@@ -230,7 +230,7 @@ export default function ParentGuidePage() {
         <Card className="p-6 border-red-200 bg-red-50">
           <div className="flex items-center gap-3 mb-4">
             <Eye className="h-6 w-6 text-red-600" />
-            <h2 className="text-2xl font-bold text-red-900">Warning Signs to Watch For</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-red-900">Warning Signs to Watch For</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -260,7 +260,7 @@ export default function ParentGuidePage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <ExternalLink className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Official Resources & Support</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Official Resources & Support</h2>
           </div>
           
           <div className="space-y-4">
@@ -328,9 +328,9 @@ export default function ParentGuidePage() {
 
         {/* Platform Comparison */}
         <Card className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Platform Comparison</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Platform Comparison</h2>
           
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-2 px-2">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
@@ -380,7 +380,7 @@ export default function ParentGuidePage() {
         <Card className="p-6 border-red-200 bg-red-50">
           <div className="flex items-center gap-3 mb-4">
             <AlertTriangle className="h-6 w-6 text-red-600" />
-            <h2 className="text-2xl font-bold text-red-900">If You're Concerned</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-red-900">If You're Concerned</h2>
           </div>
           <div className="space-y-3 text-red-800">
             <p>

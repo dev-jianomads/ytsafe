@@ -32,10 +32,10 @@ export default function HowItWorksPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-green-50 border-b">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
             <Heart className="h-8 w-8 text-pink-500" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">How StreamSafe Kids Works</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">How StreamSafe Kids Works</h1>
               <p className="text-gray-600">Understanding our YouTube safety analysis process</p>
             </div>
           </div>
@@ -52,7 +52,7 @@ export default function HowItWorksPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <Search className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Our Analysis Process</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Our Analysis Process</h2>
           </div>
           
           <div className="space-y-6">
@@ -121,7 +121,7 @@ export default function HowItWorksPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <BarChart3 className="h-6 w-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Content Categories Explained</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Content Categories Explained</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -177,7 +177,7 @@ export default function HowItWorksPage() {
         <Card className="p-6 border-blue-200 bg-blue-50">
           <div className="flex items-center gap-3 mb-4">
             <GraduationCap className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-blue-900">Educational Content Protection</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-900">Educational Content Protection</h2>
           </div>
           <p className="text-blue-800 mb-4">
             Our system recognizes when content is genuinely educational and automatically reduces safety scores by 1 point across all categories. This ensures that:
@@ -206,7 +206,7 @@ export default function HowItWorksPage() {
         <Card className="p-6 border-amber-200 bg-amber-50">
           <div className="flex items-center gap-3 mb-4">
             <AlertTriangle className="h-6 w-6 text-amber-600" />
-            <h2 className="text-2xl font-bold text-amber-900">Important Limitations</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-amber-900">Important Limitations</h2>
           </div>
           <div className="space-y-3 text-amber-800">
             <p>

@@ -32,10 +32,10 @@ export default function AboutPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-green-50 border-b">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
             <Heart className="h-8 w-8 text-pink-500" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">About StreamSafe Kids</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">About StreamSafe Kids</h1>
               <p className="text-gray-600">Making YouTube safer for families, one channel at a time</p>
             </div>
           </div>
@@ -52,7 +52,7 @@ export default function AboutPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Shield className="h-6 w-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Our Mission</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Our Mission</h2>
           </div>
           <p className="text-gray-700 leading-relaxed mb-4">
             StreamSafe Kids provides ESRB-style age ratings for YouTube channels, helping parents make informed decisions about what content is appropriate for their children. We analyze recent videos using AI-powered content classification to give you clear, actionable safety information.
@@ -66,7 +66,7 @@ export default function AboutPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Zap className="h-6 w-6 text-green-600" />
-            <h2 className="text-2xl font-bold text-gray-900">How Our Analysis Works</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">How Our Analysis Works</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -117,7 +117,7 @@ export default function AboutPage() {
 
         {/* Rating Categories */}
         <Card className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Content Categories We Analyze</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Content Categories We Analyze</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { name: 'Violence', desc: 'Physical aggression, fighting, weapons, graphic content' },
@@ -138,7 +138,7 @@ export default function AboutPage() {
 
         {/* Age Ratings */}
         <Card className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Age Rating System</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Age Rating System</h2>
           <div className="space-y-3">
             {[
               { rating: 'E', color: 'bg-green-500', age: 'Ages 6 and under', desc: 'Content suitable for young children with minimal concerning elements' },
@@ -147,10 +147,10 @@ export default function AboutPage() {
               { rating: '16+', color: 'bg-red-500', age: 'Ages 16 and up', desc: 'Mature content with strong themes not suitable for younger viewers' }
             ].map((rating, index) => (
               <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                <Badge className={`${rating.color} text-white font-bold px-3 py-1`}>
+                <Badge className={`${rating.color} text-white font-bold px-2 py-1 text-sm flex-shrink-0`}>
                   {rating.rating}
                 </Badge>
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-semibold text-gray-900">{rating.age}</h3>
                   <p className="text-sm text-gray-600">{rating.desc}</p>
                 </div>
@@ -163,7 +163,7 @@ export default function AboutPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Users className="h-6 w-6 text-purple-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Why Trust StreamSafe Kids?</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Why Trust StreamSafe Kids?</h2>
           </div>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
@@ -202,7 +202,7 @@ export default function AboutPage() {
 
         {/* External Resources */}
         <Card className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Trusted Resources</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Trusted Resources</h2>
           <div className="space-y-3">
             <a
               href="https://www.esafety.gov.au/parents"
