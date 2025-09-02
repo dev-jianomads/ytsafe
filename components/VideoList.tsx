@@ -9,9 +9,9 @@ interface VideoListProps {
 
 export function VideoList({ videos }: VideoListProps) {
   const getRiskColor = (maxScore: number) => {
-    if (maxScore <= 1.5) return 'bg-green-500';    // Green: None/Mild
-    if (maxScore <= 2.5) return 'bg-amber-500';    // Yellow: Moderate  
-    if (maxScore <= 3.5) return 'bg-orange-500';   // Orange: Strong
+    if (maxScore <= 1) return 'bg-green-500';      // Green: 0-1
+    if (maxScore <= 2) return 'bg-amber-500';      // Yellow: >1-2
+    if (maxScore <= 3) return 'bg-orange-500';     // Orange: >2-3
     return 'bg-red-500';                           // Red: Extreme
   };
 
