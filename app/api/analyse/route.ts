@@ -300,7 +300,6 @@ export async function POST(req: NextRequest) {
               messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 { role: "user", content: bundle } // ← Video content goes here
-                { role: "user", content: bundle }
               ],
               temperature: 0.2,
               max_tokens: 200
