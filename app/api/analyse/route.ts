@@ -497,9 +497,9 @@ export async function POST(req: NextRequest) {
               console.log(`💰 Commercial pressure detected: ${title}`);
             }
 
-            // Apply detected scores with safety-first approach
+            // Apply detected scores - use actual detected scores, not inflated ones
             categoryScores = Object.fromEntries(
-              CATEGORIES.map(k => [k, Math.max(2, detectedCategories[k as CategoryKey])])
+              CATEGORIES.map(k => [k, detectedCategories[k as CategoryKey]])
             ) as Record<CategoryKey, 0|1|2|3|4>;
             
             // EDUCATIONAL INTENT DETECTION IN FALLBACK
@@ -530,8 +530,8 @@ export async function POST(req: NextRequest) {
               isEducational = true;
             }
             
-            // Generate appropriate risk note
-            const highestCategory = Object.entries(detectedCategories)
+            // Generate appropriate risk note based on final scores
+            const highestCategory = Object.entries(categoryScores)
               .sort((a, b) => b[1] - a[1])[0];
             
             if (highestCategory[1] >= 3) {
@@ -545,17 +545,76 @@ export async function POST(req: NextRequest) {
                 commercial_pressure: 'commercial pressure'
               };
               riskNotes = [categoryNames[highestCategory[0]] || 'analysis failed'];
+            } else if (highestCategory[1] >= 2) {
+              const categoryNames: Record<string, string> = {
+                gambling: 'gambling content',
+                language: 'mild language', 
+                violence: 'mild violence',
+                sexual_content: 'suggestive content',
+                substances: 'substance references',
+                sensitive_topics: 'sensitive topics',
+                commercial_pressure: 'commercial pressure'
+              };
+              riskNotes = [categoryNames[highestCategory[0]] || 'moderate content'];
+            } else if (highestCategory[1] >= 1) {
+              const categoryNames: Record<string, string> = {
+                gambling: 'gambling references',
+                language: 'mild language', 
+                violence: 'mild action',
+                sexual_content: 'mild content',
+                substances: 'substance mentions',
+                sensitive_topics: 'mild themes',
+                commercial_pressure: 'sponsorship content'
+              };
+              riskNotes = [categoryNames[highestCategory[0]] || 'mild content'];
             } else {
-              riskNotes = ["analysis failed"];
+              riskNotes = ["family friendly"];
             }
             analysisFailureCount++;
           }
 
           const maxScore = Math.max(...Object.values(categoryScores));
+          
+          // Ensure risk notes match the actual scores for successful analyses too
           if (riskNotes.length === 0) {
-            const fallbackNote = maxScore >= 3 ? "strong content" : 
-                                maxScore === 2 ? "moderate content" : "mild content";
-            riskNotes = [fallbackNote];
+            // Find the highest scoring categories and generate appropriate notes
+            const sortedCategories = Object.entries(categoryScores)
+              .sort((a, b) => b[1] - a[1])
+              .filter(([_, score]) => score > 0);
+            
+            if (sortedCategories.length > 0) {
+              const topCategory = sortedCategories[0];
+              const score = topCategory[1];
+              const category = topCategory[0];
+              
+              const categoryNames: Record<string, Record<number, string>> = {
+                violence: { 1: 'mild action', 2: 'moderate violence', 3: 'strong violence', 4: 'extreme violence' },
+                language: { 1: 'mild language', 2: 'moderate language', 3: 'strong language', 4: 'extreme language' },
+                sexual_content: { 1: 'mild content', 2: 'suggestive content', 3: 'sexual content', 4: 'explicit content' },
+                substances: { 1: 'substance mentions', 2: 'substance references', 3: 'substance use', 4: 'heavy substance use' },
+                gambling: { 1: 'gambling mentions', 2: 'gambling content', 3: 'gambling focus', 4: 'gambling promotion' },
+                sensitive_topics: { 1: 'mild themes', 2: 'sensitive topics', 3: 'heavy themes', 4: 'disturbing content' },
+                commercial_pressure: { 1: 'sponsorship content', 2: 'commercial content', 3: 'commercial pressure', 4: 'aggressive marketing' }
+              };
+              
+              const categoryLabels = categoryNames[category as CategoryKey];
+              if (categoryLabels && categoryLabels[score]) {
+                riskNotes = [categoryLabels[score]];
+              } else {
+                riskNotes = [score >= 3 ? "strong content" : score === 2 ? "moderate content" : "mild content"];
+              }
+              
+              // Add secondary categories if they're also significant
+              if (sortedCategories.length > 1 && sortedCategories[1][1] >= 2) {
+                const secondCategory = sortedCategories[1];
+                const secondCategoryLabels = categoryNames[secondCategory[0] as CategoryKey];
+                if (secondCategoryLabels && secondCategoryLabels[secondCategory[1]]) {
+                  riskNotes.push(secondCategoryLabels[secondCategory[1]]);
+                }
+              }
+            } else {
+              riskNotes = ["family friendly"];
+            }
           }
 
           return {
