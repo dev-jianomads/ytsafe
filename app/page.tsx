@@ -223,48 +223,58 @@ export default function Home() {
               <Card className="p-8 sm:p-12">
                 {/* How It Works Section */}
                 <div className="p-6 bg-green-50 rounded-lg border border-green-200 text-left max-w-2xl mx-auto">
-                  <h4 className="text-lg font-semibold text-green-900 mb-4 text-center">How Our Safety Analysis Works</h4>
+                  <h4 className="text-lg font-semibold text-green-900 mb-4 text-center">Why Trust StreamSafe Kids?</h4>
                   
                   <div className="space-y-4 text-sm text-green-800">
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">1</span>
+                        <span className="text-xs font-bold text-green-700">✓</span>
                       </div>
                       <div>
-                        <p className="font-medium mb-1">We analyze what's actually said and shown</p>
-                        <p className="text-green-700">Our AI reviews video transcripts, titles, and descriptions to understand the real content - not just what creators claim it is.</p>
+                        <p className="font-medium mb-1">ESRB-Standard Analysis</p>
+                        <p className="text-green-700">We use the same content categories and rating methodology as video game ratings, adapted for YouTube content.</p>
                       </div>
                     </div>
                     
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">2</span>
+                        <span className="text-xs font-bold text-green-700">✓</span>
                       </div>
                       <div>
-                        <p className="font-medium mb-1">We check how the community responds</p>
-                        <p className="text-green-700">Comments reveal the real audience age and concerns. Toxic discussions or inappropriate language in comments affects the rating.</p>
+                        <p className="font-medium mb-1">AI-Powered Content Review</p>
+                        <p className="text-green-700">Our analysis reviews actual video transcripts and community responses, not just metadata, for accurate safety assessments.</p>
                       </div>
                     </div>
                     
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">3</span>
+                        <span className="text-xs font-bold text-green-700">✓</span>
                       </div>
                       <div>
-                        <p className="font-medium mb-1">We look for warning signs in engagement</p>
-                        <p className="text-green-700">Unusual patterns like very high controversy, clickbait behavior, or suspicious engagement help identify potentially problematic content.</p>
+                        <p className="font-medium mb-1">Educational Content Protection</p>
+                        <p className="text-green-700">We recognize educational intent and adjust ratings fairly, so learning content isn't unfairly penalized for discussing sensitive topics.</p>
                       </div>
                     </div>
                     
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-green-700">4</span>
+                        <span className="text-xs font-bold text-green-700">✓</span>
                       </div>
                       <div>
-                        <p className="font-medium mb-1">We focus on recent videos</p>
-                        <p className="text-green-700">Channels change over time. We analyze the 5 most recent videos to give you current safety information, not outdated ratings.</p>
+                        <p className="font-medium mb-1">Transparent & Actionable Results</p>
+                        <p className="text-green-700">We show you exactly why content received its rating with specific examples, risk factors, and clear next steps for parents.</p>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Learn More Link */}
+                  <div className="mt-4 text-center">
+                    <a 
+                      href="/how-it-works" 
+                      className="text-sm text-green-600 hover:text-green-800 underline font-medium"
+                    >
+                      Learn more about our detailed analysis process →
+                    </a>
                   </div>
                   
                   {/* Complete Rating Categories & Coverage Section */}
