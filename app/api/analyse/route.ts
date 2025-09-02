@@ -288,16 +288,19 @@ export async function POST(req: NextRequest) {
           }
 
           try {
+            // Send content bundle to LLM for analysis
             const completion = await openai.chat.completions.create({
               model: "gpt-4o-mini",
               messages: [
                 { role: "system", content: SYSTEM_PROMPT },
+                { role: "user", content: bundle } // ← Video content goes here
                 { role: "user", content: bundle }
               ],
               temperature: 0.2,
               max_tokens: 200
             });
 
+            // LLM returns JSON with category scores
             // Track token usage for main analysis
             const usage = completion.usage;
             if (usage) {
@@ -318,6 +321,7 @@ export async function POST(req: NextRequest) {
             let parsed: any = null;
             
             try {
+              // Parse the JSON response from LLM
               // Try to extract JSON from response (in case there's extra text)
               const jsonMatch = responseText.match(/\{[\s\S]*\}/);
               const jsonString = jsonMatch ? jsonMatch[0] : responseText;
@@ -326,6 +330,7 @@ export async function POST(req: NextRequest) {
               // Retry with explicit formatting instruction
               let retryCompletion: any = null;
               try {
+            // Validate the LLM response against our schema
                 retryCompletion = await openai.chat.completions.create({
                   model: "gpt-4o-mini",
                   messages: [
@@ -367,6 +372,7 @@ export async function POST(req: NextRequest) {
             // Validate and sanitize scores
             const result = VideoScoreSchema.safeParse(parsed);
             if (result.success) {
+              // Extract category scores from LLM response
               categoryScores = Object.fromEntries(
                 CATEGORIES.map(k => [k, Math.max(0, Math.min(4, Math.round(result.data[k])))])
               ) as Record<CategoryKey, 0|1|2|3|4>;
@@ -374,7 +380,9 @@ export async function POST(req: NextRequest) {
               isEducational = result.data.isEducational || false;
               
               // Apply educational modifier if content is educational
+              // Apply educational modifier if content is educational
               if (isEducational) {
+                // Reduce scores by 1 point for educational content (minimum 0)
                 // Reduce scores by 1 point for educational content (minimum 0)
                 categoryScores = Object.fromEntries(
                   CATEGORIES.map(k => [k, Math.max(0, categoryScores[k] - 1)])
