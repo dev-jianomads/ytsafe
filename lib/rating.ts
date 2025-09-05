@@ -12,8 +12,38 @@ export function ageFromScores(scores: Record<CategoryKey, number>): "E" | "E10+"
     return "16+";
   }
   
-  // ALCOHOL OVERRIDE: If substances > 1.0 and likely alcohol content, minimum age is 16+
-  if (scores.substances > 1.0) {
+  const vals = Object.values(scores);
+  if (vals.every(v => v <= 1)) return "E";
+  if (vals.every(v => v <= 2)) return "E10+";
+  if (vals.every(v => v <= 3)) return "T";
+  return "16+";
+}
+
+// Check if content contains alcohol-specific keywords
+export function detectAlcoholContent(content: string): boolean {
+  const alcoholKeywords = [
+    'drunk', 'alcohol', 'beer', 'wine', 'vodka', 'whiskey', 'cocktail',
+    'bar', 'pub', 'drinking', 'drinking game', 'party drinking', 'booze',
+    'liquor', 'champagne', 'rum', 'gin', 'tequila', 'shots', 'bartender',
+    'brewery', 'winery', 'distillery', 'alcoholic', 'intoxicated'
+  ];
+  
+  const lowerContent = content.toLowerCase();
+  return alcoholKeywords.some(keyword => lowerContent.includes(keyword));
+}
+
+// Age calculation with alcohol-specific override
+export function ageFromScoresWithAlcohol(
+  scores: Record<CategoryKey, number>, 
+  hasAlcoholContent: boolean
+): "E" | "E10+" | "T" | "16+" {
+  // GAMBLING OVERRIDE: If gambling > 1.0, minimum age is 16+
+  if (scores.gambling > 1.0) {
+    return "16+";
+  }
+  
+  // ALCOHOL OVERRIDE: If substances > 1.0 AND alcohol detected, minimum age is 16+
+  if (scores.substances > 1.0 && hasAlcoholContent) {
     return "16+";
   }
   
@@ -48,14 +78,18 @@ export function deriveBullets(scores: Record<CategoryKey, number>): string[] {
     });
 }
 
-export function makeVerdict(ageBand: string, scores: Record<CategoryKey, number>): string {
+export function makeVerdict(
+  ageBand: string, 
+  scores: Record<CategoryKey, number>, 
+  hasAlcoholContent?: boolean
+): string {
   // Special gambling verdict override
   if (scores.gambling > 1.0) {
     return "Suitable for 16+ only due to gambling content. Legal gambling is restricted to 18+ in most jurisdictions.";
   }
   
-  // Special alcohol verdict override
-  if (scores.substances > 1.0) {
+  // Special alcohol verdict override - only if alcohol specifically detected
+  if (scores.substances > 1.0 && hasAlcoholContent) {
     return "Suitable for 16+ only due to alcohol content. Legal alcohol consumption is restricted to 18+ in most jurisdictions.";
   }
   

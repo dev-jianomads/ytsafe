@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { YoutubeTranscript } from "youtube-transcript";
 import OpenAI from "openai";
 import { ageFromScores, deriveBullets, makeVerdict, VideoScoreSchema, CATEGORIES } from "@/lib/rating";
+import { detectAlcoholContent, ageFromScoresWithAlcohol } from "@/lib/rating";
 import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments } from "@/lib/youtube";
 import type { CategoryKey, PerVideoScore } from "@/types";
 import { trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
@@ -159,6 +160,7 @@ export async function POST(req: NextRequest) {
       let analysisFailureCount = 0;
       let transcriptAvailable = 0;
       let totalVideos = detailsData.items?.length || 0;
+      let hasAlcoholContent = false; // Track if any video contains alcohol content
 
       // Process videos in batches to avoid timeout
       const BATCH_SIZE = 3;
@@ -206,9 +208,19 @@ export async function POST(req: NextRequest) {
             video.snippet?.description ?? ""
           ].join("\n").trim();
           
+          // Check for alcohol content in this video
+          const videoHasAlcohol = detectAlcoholContent(bundle);
+          if (videoHasAlcohol) {
+            hasAlcoholContent = true; // Mark that channel has alcohol content
+          }
+          
           // Only include transcript if we have sufficient transcript coverage
           if (useTranscripts && transcript) {
             bundle += "\n" + transcript.slice(0, 6000);
+            // Also check transcript for alcohol content
+            if (!videoHasAlcohol && detectAlcoholContent(transcript)) {
+              hasAlcoholContent = true;
+            }
           }
 
           // Add top comments if available
@@ -490,12 +502,13 @@ export async function POST(req: NextRequest) {
               'liquor', 'champagne', 'rum', 'gin', 'tequila', 'shots', 'bartender'
             ];
             
-            let hasAlcoholContent = false;
+            let videoHasAlcoholFallback = false;
             if (substanceKeywords.some(keyword => content.includes(keyword))) {
               detectedCategories.substances = 3;
               // Check if it's specifically alcohol content
               if (alcoholKeywords.some(keyword => content.includes(keyword))) {
-                hasAlcoholContent = true;
+                videoHasAlcoholFallback = true;
+                hasAlcoholContent = true; // Mark channel-level alcohol detection
               }
               console.log(`🍺 Substance content detected: ${title}`);
             }
@@ -711,9 +724,9 @@ export async function POST(req: NextRequest) {
         })
       ) as Record<CategoryKey, number>;
 
-      const ageBand = ageFromScores(aggregateScores);
+      const ageBand = ageFromScoresWithAlcohol(aggregateScores, hasAlcoholContent);
       const bullets = deriveBullets(aggregateScores);
-      const verdict = makeVerdict(ageBand, aggregateScores);
+      const verdict = makeVerdict(ageBand, aggregateScores, hasAlcoholContent);
 
       const analysisResult = {
         query: q,
@@ -723,7 +736,8 @@ export async function POST(req: NextRequest) {
           scores: aggregateScores,
           ageBand,
           verdict,
-          bullets
+          bullets,
+          hasAlcoholContent // Pass alcohol detection to frontend
         },
         warnings: warnings.length > 0 ? warnings : undefined,
         transcriptCoverage: {

@@ -32,6 +32,7 @@ export type Aggregate = {
   ageBand: "E" | "E10+" | "T" | "16+";
   verdict: string;
   bullets: string[];
+  hasAlcoholContent?: boolean;
 };
 
 export type AnalyseResponse = {

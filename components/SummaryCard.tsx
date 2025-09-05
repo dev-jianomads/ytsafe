@@ -64,8 +64,8 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
   const hasMildGamblingContent = aggregate.scores.gambling > 0.5 && aggregate.scores.gambling <= 1.0;
   
   // Check if alcohol content is present
-  const hasAlcoholContent = aggregate.scores.substances > 1.0;
-  const hasMildAlcoholContent = aggregate.scores.substances > 0.5 && aggregate.scores.substances <= 1.0;
+  const hasAlcoholContent = aggregate.scores.substances > 1.0 && aggregate.hasAlcoholContent;
+  const hasMildAlcoholContent = aggregate.scores.substances > 0.5 && aggregate.scores.substances <= 1.0 && aggregate.hasAlcoholContent;
 
   const handleShare = async () => {
     const channelName = channel?.title || 'Unknown Channel';
