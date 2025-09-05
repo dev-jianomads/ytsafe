@@ -12,6 +12,11 @@ export function ageFromScores(scores: Record<CategoryKey, number>): "E" | "E10+"
     return "16+";
   }
   
+  // ALCOHOL OVERRIDE: If substances > 1.0 and likely alcohol content, minimum age is 16+
+  if (scores.substances > 1.0) {
+    return "16+";
+  }
+  
   const vals = Object.values(scores);
   if (vals.every(v => v <= 1)) return "E";
   if (vals.every(v => v <= 2)) return "E10+";
@@ -47,6 +52,11 @@ export function makeVerdict(ageBand: string, scores: Record<CategoryKey, number>
   // Special gambling verdict override
   if (scores.gambling > 1.0) {
     return "Suitable for 16+ only due to gambling content. Legal gambling is restricted to 18+ in most jurisdictions.";
+  }
+  
+  // Special alcohol verdict override
+  if (scores.substances > 1.0) {
+    return "Suitable for 16+ only due to alcohol content. Legal alcohol consumption is restricted to 18+ in most jurisdictions.";
   }
   
   const head = ageBand === "E" ? "Suitable for ages 6 and under" :

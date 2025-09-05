@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AlertTriangle, Share, ExternalLink, BookOpen, Shield, Ban, Dice1 as Casino } from 'lucide-react';
+import { AlertTriangle, Share, ExternalLink, BookOpen, Shield, Ban, Dice as Casino, Wine } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ParentResourcesModal } from './ParentResourcesModal';
@@ -62,6 +62,10 @@ export function SummaryCard({ aggregate, channel, transcriptCoverage, videos }: 
   // Check if gambling content is present
   const hasGamblingContent = aggregate.scores.gambling > 1.0;
   const hasMildGamblingContent = aggregate.scores.gambling > 0.5 && aggregate.scores.gambling <= 1.0;
+  
+  // Check if alcohol content is present
+  const hasAlcoholContent = aggregate.scores.substances > 1.0;
+  const hasMildAlcoholContent = aggregate.scores.substances > 0.5 && aggregate.scores.substances <= 1.0;
 
   const handleShare = async () => {
     const channelName = channel?.title || 'Unknown Channel';
@@ -366,6 +370,35 @@ T (Ages 11-15): All categories ≤ 3
           </div>
           <p className="text-sm text-amber-800">
             Contains gambling-related content or references. Consider your child's maturity level.
+          </p>
+        </div>
+      )}
+      
+      {/* Alcohol Content Warning */}
+      {hasAlcoholContent && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-3 mb-2">
+            <Wine className="h-5 w-5 text-red-600" />
+            <h3 className="font-semibold text-red-900">🍺 Alcohol Content Detected</h3>
+          </div>
+          <p className="text-sm text-red-800 mb-2">
+            <strong>Legal alcohol consumption is restricted to 18+ in most jurisdictions.</strong> Content may normalize drinking behaviors for minors.
+          </p>
+          <p className="text-xs text-red-700">
+            This content has been automatically rated 16+ due to alcohol themes.
+          </p>
+        </div>
+      )}
+      
+      {/* Mild Alcohol Warning */}
+      {hasMildAlcoholContent && !hasAlcoholContent && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-1">
+            <Wine className="h-4 w-4 text-amber-600" />
+            <h4 className="font-medium text-amber-900">Alcohol References Detected</h4>
+          </div>
+          <p className="text-sm text-amber-800">
+            Contains alcohol-related content or references. Consider your child's maturity level.
           </p>
         </div>
       )}

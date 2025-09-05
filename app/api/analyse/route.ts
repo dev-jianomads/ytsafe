@@ -477,12 +477,26 @@ export async function POST(req: NextRequest) {
 
             // 🍺 SUBSTANCES DETECTION
             const substanceKeywords = [
-              'drunk', 'alcohol', 'beer', 'wine', 'vodka', 'whiskey', 'smoking',
+              'drunk', 'alcohol', 'beer', 'wine', 'vodka', 'whiskey', 'cocktail',
+              'bar', 'pub', 'drinking', 'drinking game', 'party drinking',
               'weed', 'marijuana', 'drugs', 'high', 'stoned', 'vaping', 'vape',
-              'cigarette', 'tobacco', 'party', 'drinking game'
+              'cigarette', 'tobacco', 'smoking'
             ];
+            
+            // Enhanced alcohol-specific detection
+            const alcoholKeywords = [
+              'drunk', 'alcohol', 'beer', 'wine', 'vodka', 'whiskey', 'cocktail',
+              'bar', 'pub', 'drinking', 'drinking game', 'party drinking', 'booze',
+              'liquor', 'champagne', 'rum', 'gin', 'tequila', 'shots', 'bartender'
+            ];
+            
+            let hasAlcoholContent = false;
             if (substanceKeywords.some(keyword => content.includes(keyword))) {
               detectedCategories.substances = 3;
+              // Check if it's specifically alcohol content
+              if (alcoholKeywords.some(keyword => content.includes(keyword))) {
+                hasAlcoholContent = true;
+              }
               console.log(`🍺 Substance content detected: ${title}`);
             }
 
