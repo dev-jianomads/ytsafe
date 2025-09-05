@@ -7,6 +7,11 @@ export const CATEGORIES: CategoryKey[] = [
 ];
 
 export function ageFromScores(scores: Record<CategoryKey, number>): "E" | "E10+" | "T" | "16+" {
+  // GAMBLING OVERRIDE: If gambling > 1.0, minimum age is 16+
+  if (scores.gambling > 1.0) {
+    return "16+";
+  }
+  
   const vals = Object.values(scores);
   if (vals.every(v => v <= 1)) return "E";
   if (vals.every(v => v <= 2)) return "E10+";
@@ -39,6 +44,11 @@ export function deriveBullets(scores: Record<CategoryKey, number>): string[] {
 }
 
 export function makeVerdict(ageBand: string, scores: Record<CategoryKey, number>): string {
+  // Special gambling verdict override
+  if (scores.gambling > 1.0) {
+    return "Suitable for 16+ only due to gambling content. Legal gambling is restricted to 18+ in most jurisdictions.";
+  }
+  
   const head = ageBand === "E" ? "Suitable for ages 6 and under" :
                ageBand === "E10+" ? "Generally OK for 7–10" :
                ageBand === "T" ? "Better for 11–15" : "Suitable for 16+ only";
