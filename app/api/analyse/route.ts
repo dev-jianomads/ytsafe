@@ -97,13 +97,14 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   let requestBody: any = null;
   let parsedQuery: string = '';
+  let device: string = 'Web'; // Default fallback
   
   try {
     requestBody = await req.json();
     const { q } = requestBody;
     parsedQuery = q;
     const userAgent = headers().get('user-agent') || undefined;
-    const device = detectDevice();
+    device = detectDevice(); // Update the declared variable
     
     // Track token usage across all OpenAI calls
     let totalPromptTokens = 0;
