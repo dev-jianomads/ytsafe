@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AlertTriangle, Share, ExternalLink, BookOpen, Shield, Ban, Casino } from 'lucide-react';
+import { AlertTriangle, Share, ExternalLink, BookOpen, Shield, Ban, Cast as Casino } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ParentResourcesModal } from './ParentResourcesModal';
