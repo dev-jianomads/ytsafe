@@ -44,6 +44,7 @@ export interface AnalyticsData {
   error_type?: string;
   session_id: string;
   user_agent_hash?: string;
+  device: string;
   total_prompt_tokens: number;
   total_completion_tokens: number;
   total_tokens: number;
@@ -163,6 +164,7 @@ export async function trackSuccessfulAnalysis(
   query: string,
   results: any,
   userAgent?: string,
+  device?: string,
   tokenUsage?: {
     total_prompt_tokens: number;
     total_completion_tokens: number;
@@ -184,6 +186,7 @@ export async function trackSuccessfulAnalysis(
     analysis_success: true,
     session_id: sessionId,
     user_agent_hash: userAgent ? hashUserAgent(userAgent) : undefined,
+    device: device || 'Web',
     total_prompt_tokens: tokenUsage?.total_prompt_tokens || 0,
     total_completion_tokens: tokenUsage?.total_completion_tokens || 0,
     total_tokens: tokenUsage?.total_tokens || 0,
@@ -198,6 +201,7 @@ export async function trackFailedAnalysis(
   query: string,
   errorType: string,
   userAgent?: string,
+  device?: string,
   tokenUsage?: {
     total_prompt_tokens: number;
     total_completion_tokens: number;
@@ -220,6 +224,7 @@ export async function trackFailedAnalysis(
     error_type: errorType,
     session_id: sessionId,
     user_agent_hash: userAgent ? hashUserAgent(userAgent) : undefined,
+    device: device || 'Web',
     total_prompt_tokens: tokenUsage?.total_prompt_tokens || 0,
     total_completion_tokens: tokenUsage?.total_completion_tokens || 0,
     total_tokens: tokenUsage?.total_tokens || 0,

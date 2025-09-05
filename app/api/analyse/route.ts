@@ -7,6 +7,7 @@ import { detectAlcoholContent, ageFromScoresWithAlcohol } from "@/lib/rating";
 import { resolveChannelId, listRecentVideoIds, getChannelInfo, getVideoComments } from "@/lib/youtube";
 import type { CategoryKey, PerVideoScore } from "@/types";
 import { trackSuccessfulAnalysis, trackFailedAnalysis } from "@/lib/analytics";
+import { detectDevice } from "@/lib/device";
 
 const SYSTEM_PROMPT = `You are an ESRB-style content rater for family suitability. Input includes the title/description/transcript excerpt of a single YouTube video, plus top community comments. Output strict JSON with per-category decimal scores from 0-4 for: violence, language, sexual_content, substances, gambling, sensitive_topics, commercial_pressure.
 
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
     const { q } = requestBody;
     parsedQuery = q;
     const userAgent = headers().get('user-agent') || undefined;
+    const device = detectDevice();
     
     // Track token usage across all OpenAI calls
     let totalPromptTokens = 0;
@@ -113,12 +115,12 @@ export async function POST(req: NextRequest) {
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
     
     if (!q || typeof q !== 'string') {
-      await trackFailedAnalysis(parsedQuery || 'invalid_query', 'MISSING_QUERY', userAgent);
+      await trackFailedAnalysis(parsedQuery || 'invalid_query', 'MISSING_QUERY', userAgent, device);
       return NextResponse.json({ error: "MISSING_QUERY" }, { status: 400 });
     }
     
     if (!YT || !OPENAI_KEY) {
-      await trackFailedAnalysis(parsedQuery, 'SERVER_MISCONFIG', userAgent);
+      await trackFailedAnalysis(parsedQuery, 'SERVER_MISCONFIG', userAgent, device);
       return NextResponse.json({ error: "SERVER_MISCONFIG" }, { status: 500 });
     }
 
@@ -130,7 +132,7 @@ export async function POST(req: NextRequest) {
       // Resolve channel ID
       const channelId = await resolveChannelId(q, YT);
       if (!channelId) {
-        await trackFailedAnalysis(parsedQuery, 'CHANNEL_NOT_FOUND', userAgent);
+        await trackFailedAnalysis(parsedQuery, 'CHANNEL_NOT_FOUND', userAgent, device);
         return NextResponse.json({ error: "CHANNEL_NOT_FOUND" }, { status: 404 });
       }
 
@@ -141,7 +143,7 @@ export async function POST(req: NextRequest) {
       ]);
 
       if (videoIds.length === 0) {
-        await trackFailedAnalysis(parsedQuery, 'NO_VIDEOS_FOUND', userAgent);
+        await trackFailedAnalysis(parsedQuery, 'NO_VIDEOS_FOUND', userAgent, device);
         return NextResponse.json({ error: "NO_VIDEOS_FOUND" }, { status: 404 });
       }
 
@@ -753,6 +755,7 @@ export async function POST(req: NextRequest) {
         parsedQuery, 
         analysisResult, 
         userAgent,
+        device,
         {
           total_prompt_tokens: totalPromptTokens,
           total_completion_tokens: totalCompletionTokens,
@@ -782,11 +785,11 @@ export async function POST(req: NextRequest) {
     });
     
     if (error.name === 'AbortError') {
-      await trackFailedAnalysis(parsedQuery, 'TIMEOUT', userAgent);
+      await trackFailedAnalysis(parsedQuery, 'TIMEOUT', userAgent, device);
       return NextResponse.json({ error: "TIMEOUT" }, { status: 408 });
     }
     
-    await trackFailedAnalysis(parsedQuery, 'ANALYSIS_FAILED', userAgent);
+    await trackFailedAnalysis(parsedQuery, 'ANALYSIS_FAILED', userAgent, device);
     return NextResponse.json({ 
       error: "ANALYSIS_FAILED", 
       detail: error?.message ?? String(error) 
