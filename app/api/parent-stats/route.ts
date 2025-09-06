@@ -63,6 +63,65 @@ export async function GET(req: NextRequest) {
       sampleRecord: allSearches?.[0] || null
     });
 
+    // Helper function to clean up display names and extract URLs from legacy data
+    const processLegacyRecord = (record: any) => {
+      let displayName = record.channel_name || record.query;
+      let channelUrl = record.channel_url;
+      let channelHandle = null;
+      
+      // If no channel_url but query looks like a URL, use it
+      if (!channelUrl && record.query) {
+        if (record.query.includes('youtube.com/')) {
+          channelUrl = record.query;
+        } else if (record.query.startsWith('@')) {
+          // Convert @handle to proper YouTube URL
+          const cleanHandle = record.query.replace(/^@+/, '');
+          channelUrl = `https://www.youtube.com/@${cleanHandle}`;
+          channelHandle = `@${cleanHandle}`;
+        }
+      }
+      
+      // Clean up display name
+      if (!record.channel_name) {
+        if (record.query.startsWith('@')) {
+          // Convert "@gameranxTV" to "GameranxTV"
+          displayName = record.query.replace(/^@+/, '');
+        } else if (record.query.includes('youtube.com/watch')) {
+          // For video URLs, try to extract a meaningful name or use "Video Link"
+          displayName = 'Video Link';
+        } else if (record.query.includes('youtube.com/')) {
+          // For other YouTube URLs, try to extract channel info
+          const urlParts = record.query.split('/');
+          const lastPart = urlParts[urlParts.length - 1];
+          if (lastPart && lastPart !== 'youtube.com') {
+            displayName = lastPart.replace(/^@+/, '');
+          } else {
+            displayName = 'YouTube Channel';
+          }
+        }
+        // Otherwise keep the original query as display name
+      }
+      
+      // Extract handle from channel_url if we have one but no handle yet
+      if (channelUrl && !channelHandle) {
+        if (channelUrl.includes('youtube.com/@')) {
+          const handleMatch = channelUrl.match(/youtube\.com\/@([^/?]+)/);
+          if (handleMatch) {
+            channelHandle = `@${handleMatch[1]}`;
+          }
+        } else if (channelUrl.includes('youtube.com/channel/')) {
+          // For channel ID URLs, we can't extract a nice handle
+          channelHandle = null;
+        }
+      }
+      
+      return {
+        displayName,
+        channelUrl,
+        channelHandle
+      };
+    };
+
     if (!allSearches || allSearches.length === 0) {
       console.warn('⚠️ No search data found');
       return NextResponse.json({
