@@ -211,7 +211,7 @@ export async function GET(req: NextRequest) {
         };
       })
       .filter(channel => channel.avg_score > 0)
-      .sort((a, b) => b.avg_score - a.search_count) // Sort by risk score, then by search count
+      .sort((a, b) => b.avg_score - a.avg_score || b.search_count - a.search_count) // Sort by risk score first, then by search count
       .slice(0, 20);
 
     // Calculate aggregate stats
