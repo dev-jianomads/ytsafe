@@ -15,6 +15,8 @@ import type { AnalyseResponse, HistoryItem } from '@/types';
 import { saveToHistory } from '@/lib/history';
 import { incrementSearchCount } from '@/lib/session';
 import { hashUserAgent } from '@/lib/analytics';
+import { BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -170,6 +172,16 @@ export default function Home() {
             onToggleHistory={() => setIsHistoryOpen(true)}
            shouldClearAfterAnalysis={shouldClearSearch}
           />
+
+          {/* Parent Stats Link */}
+          <div className="px-4 sm:px-6 pb-4">
+            <Link href="/parent-stats">
+              <Button variant="outline" className="w-full gap-2 border-purple-200 text-purple-700 hover:bg-purple-50">
+                <BarChart3 className="h-4 w-4" />
+                View Community Stats
+              </Button>
+            </Link>
+          </div>
 
           {/* Results Area */}
           <div className="flex-1 p-4 sm:p-6 min-h-0">

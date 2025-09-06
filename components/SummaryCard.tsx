@@ -6,6 +6,8 @@ import { AlertTriangle, Share, ExternalLink, BookOpen, Shield, Ban, DollarSign a
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ParentResourcesModal } from './ParentResourcesModal';
+import Link from 'next/link';
+import { BarChart3 } from 'lucide-react';
 import type { Aggregate } from '@/types';
 
 interface SummaryCardProps {
@@ -445,6 +447,18 @@ T (Ages 11-15): All categories ≤ 3
             <span className="hidden sm:inline">Parent Resources</span>
             <span className="sm:hidden">Resources</span>
           </Button>
+          
+          <Link href="/parent-stats">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-purple-200 text-purple-700 hover:bg-purple-50"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Community Stats</span>
+              <span className="sm:hidden">Stats</span>
+            </Button>
+          </Link>
           
           <Button
             onClick={handleShareGuide}
