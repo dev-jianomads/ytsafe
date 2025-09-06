@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 
     // Calculate aggregate stats
     const totalSearches = statsData?.length || 0;
-    const uniqueChannels = new Set(statsData?.map(s => s.query) || []).size;
+    const uniqueChannels = new Set(statsData?.map((s: any) => s.query) || []).size;
     
     // Calculate average risk score from category scores
     let totalRiskScore = 0;
