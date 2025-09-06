@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
     let riskScoreCount = 0;
     const ratingDistribution: Record<string, number> = { 'E': 0, 'E10+': 0, 'T': 0, '16+': 0 };
 
-    statsData?.forEach(record => {
+    statsData?.forEach((record: any) => {
       if (record.age_band) {
         ratingDistribution[record.age_band] = (ratingDistribution[record.age_band] || 0) + 1;
       }
