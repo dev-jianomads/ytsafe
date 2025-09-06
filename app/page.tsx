@@ -305,6 +305,10 @@ export default function Home() {
                   </div>
                 </div>
               </Card>
+            )}
+          </div>
+        </div>
+      </div>
       
       {/* Feedback Modal */}
       <FeedbackModal
