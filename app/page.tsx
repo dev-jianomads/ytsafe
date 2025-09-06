@@ -305,17 +305,6 @@ export default function Home() {
                   </div>
                 </div>
               </Card>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t py-6 px-4 text-center mt-auto">
-        <p className="text-sm text-gray-600">
-          Not affiliated with YouTube or any video platform.
-        </p>
-      </footer>
       
       {/* Feedback Modal */}
       <FeedbackModal
