@@ -370,11 +370,11 @@ Always preview content yourself and consider your child's maturity level.`;
                         rel="noopener noreferrer"
                         className="font-semibold text-gray-900 hover:text-red-600 hover:underline line-clamp-1"
                       >
-                        {channel.channel_title || channel.query}
+                        {channel.channel_title}
                       </a>
                     ) : (
                       <span className="font-semibold text-gray-900 line-clamp-1">
-                        {channel.channel_title || channel.query}
+                        {channel.channel_title}
                       </span>
                     )}
                   </div>
