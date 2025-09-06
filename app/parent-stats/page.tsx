@@ -301,6 +301,12 @@ Always preview content yourself and consider your child's maturity level.`;
             <h2 className="text-xl font-bold text-gray-900">Most Searched Channels</h2>
           </div>
           
+          {/* Header for mobile */}
+          <div className="flex justify-between items-center text-sm text-gray-600 font-medium mb-3 px-3 sm:hidden">
+            <span>Channel</span>
+            <span>Searches</span>
+          </div>
+          
           <div className="space-y-3">
             {data.mostSearched.slice(0, 10).map((channel, index) => (
               <div key={`${channel.query}-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
@@ -327,19 +333,20 @@ Always preview content yourself and consider your child's maturity level.`;
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   {channel.age_band && (
                     <Badge className={`text-xs ${getAgeBadgeColor(channel.age_band)}`}>
                       {channel.age_band}
                     </Badge>
                   )}
                   {channel.avg_score && (
-                    <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)}`}>
+                    <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)} hidden sm:inline`}>
                       {channel.avg_score.toFixed(1)}/4
                     </span>
                   )}
                   <span className="text-sm text-gray-600 font-medium">
-                    {channel.search_count} searches
+                    <span className="sm:hidden">{channel.search_count}</span>
+                    <span className="hidden sm:inline">{channel.search_count} searches</span>
                   </span>
                 </div>
               </div>
@@ -352,6 +359,12 @@ Always preview content yourself and consider your child's maturity level.`;
           <div className="flex items-center gap-3 mb-6">
             <AlertTriangle className="h-6 w-6 text-red-600" />
             <h2 className="text-xl font-bold text-gray-900">Highest Risk Channels</h2>
+          </div>
+          
+          {/* Header for mobile */}
+          <div className="flex justify-between items-center text-sm text-gray-600 font-medium mb-3 px-3 sm:hidden">
+            <span>Channel</span>
+            <span>Searches</span>
           </div>
           
           <div className="space-y-3">
@@ -370,27 +383,28 @@ Always preview content yourself and consider your child's maturity level.`;
                         rel="noopener noreferrer"
                         className="font-semibold text-gray-900 hover:text-red-600 hover:underline line-clamp-1"
                       >
-                        {channel.channel_title}
+                        {channel.channel_title || channel.query}
                       </a>
                     ) : (
                       <span className="font-semibold text-gray-900 line-clamp-1">
-                        {channel.channel_title}
+                        {channel.channel_title || channel.query}
                       </span>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   {channel.age_band && (
                     <Badge className={`text-xs ${getAgeBadgeColor(channel.age_band)}`}>
                       {channel.age_band}
                     </Badge>
                   )}
-                  <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)}`}>
+                  <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)} hidden sm:inline`}>
                     {channel.avg_score?.toFixed(1)}/4
                   </span>
                   <span className="text-sm text-gray-600 font-medium">
-                    {channel.search_count} searches
+                    <span className="sm:hidden">{channel.search_count}</span>
+                    <span className="hidden sm:inline">{channel.search_count} searches</span>
                   </span>
                 </div>
               </div>
