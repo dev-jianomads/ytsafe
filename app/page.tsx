@@ -283,17 +283,6 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  {/* Educational Content Protection Section */}
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <h6 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                      <span className="text-blue-600">🎓</span>
-                      Educational Content Protection
-                    </h6>
-                    <p className="text-xs text-blue-800 leading-relaxed">
-                      Our system recognizes educational intent and automatically reduces scores by 1 point across all categories for genuinely educational content. This means science experiments discussing "dangerous" chemicals, history lessons about wars, or health education about mental health topics get fair treatment and aren't over-penalized.
-                    </p>
-                  </div>
-                  
                   {/* Learn More Link */}
                   <div className="mt-4 text-center">
                     <a 
