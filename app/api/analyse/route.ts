@@ -756,7 +756,6 @@ export async function POST(req: NextRequest) {
         parsedQuery, 
         analysisResult, 
         channelInfo,
-        channelInfo,
         userAgent,
         device,
         {
