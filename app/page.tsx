@@ -9,6 +9,7 @@ import { SummaryCard } from '@/components/SummaryCard';
 import { CategoryTable } from '@/components/CategoryTable';
 import { VideoList } from '@/components/VideoList';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Heart, Shield, Brain, GraduationCap, FileText } from 'lucide-react';
 import type { AnalyseResponse, HistoryItem } from '@/types';
