@@ -8,18 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Heart, TrendingUp, AlertTriangle, Share, 
-  ArrowLeft, BarChart3, Search, Shield,
-  ChevronLeft, ChevronRight, Eye, Calendar
+  ArrowLeft, BarChart3, Search, Shield, Eye, Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import type { Metadata } from 'next';
 
 interface ChannelStat {
   query: string;
   channel_title?: string;
   channel_handle?: string;
-  channel_thumbnail?: string;
+  channel_url?: string;
   search_count: number;
   avg_score?: number;
   age_band?: string;
@@ -40,8 +38,6 @@ export default function ParentStatsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'all' | '30days'>('all');
-  const [currentMostSearched, setCurrentMostSearched] = useState(0);
-  const [currentHighestRisk, setCurrentHighestRisk] = useState(0);
 
   const fetchStats = async (range: 'all' | '30days') => {
     setIsLoading(true);
@@ -127,29 +123,6 @@ Always preview content yourself and consider your child's maturity level.`;
     }
   };
 
-  const nextMostSearched = () => {
-    if (data && currentMostSearched < data.mostSearched.length - 3) {
-      setCurrentMostSearched(prev => prev + 1);
-    }
-  };
-
-  const prevMostSearched = () => {
-    if (currentMostSearched > 0) {
-      setCurrentMostSearched(prev => prev - 1);
-    }
-  };
-
-  const nextHighestRisk = () => {
-    if (data && currentHighestRisk < data.highestRisk.length - 3) {
-      setCurrentHighestRisk(prev => prev + 1);
-    }
-  };
-
-  const prevHighestRisk = () => {
-    if (currentHighestRisk > 0) {
-      setCurrentHighestRisk(prev => prev - 1);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -323,203 +296,105 @@ Always preview content yourself and consider your child's maturity level.`;
 
         {/* Most Searched Channels */}
         <Card className="p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">Most Searched Channels</h2>
-            </div>
-            
-            {/* Mobile Navigation */}
-            <div className="flex items-center gap-2 sm:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={prevMostSearched}
-                disabled={currentMostSearched === 0}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-gray-600">
-                {Math.min(currentMostSearched + 3, data.mostSearched.length)} of {data.mostSearched.length}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={nextMostSearched}
-                disabled={currentMostSearched >= data.mostSearched.length - 3}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <TrendingUp className="h-6 w-6 text-blue-600" />
+            <h2 className="text-xl font-bold text-gray-900">Most Searched Channels</h2>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.mostSearched
-              .slice(currentMostSearched, currentMostSearched + 3)
-              .map((channel, index) => (
-              <div key={`${channel.query}-${index}`} className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-700">
-                    {currentMostSearched + index + 1}
+          <div className="space-y-3">
+            {data.mostSearched.slice(0, 10).map((channel, index) => (
+              <div key={`${channel.query}-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-700 flex-shrink-0">
+                    {index + 1}
                   </div>
-                  {channel.channel_thumbnail ? (
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={channel.channel_thumbnail} alt={channel.channel_title} />
-                      <AvatarFallback>{channel.channel_title?.[0] || channel.query[0]}</AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500 text-sm font-medium">
-                        {channel.channel_title?.[0] || channel.query[0]}
+                  
+                  <div className="flex-1 min-w-0">
+                    {channel.channel_url ? (
+                      <a
+                        href={channel.channel_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-gray-900 hover:text-blue-600 hover:underline line-clamp-1"
+                      >
+                        {channel.channel_title || channel.query}
+                      </a>
+                    ) : (
+                      <span className="font-semibold text-gray-900 line-clamp-1">
+                        {channel.channel_title || channel.query}
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 flex-shrink-0">
                   {channel.age_band && (
                     <Badge className={`text-xs ${getAgeBadgeColor(channel.age_band)}`}>
                       {channel.age_band}
                     </Badge>
                   )}
-                </div>
-                
-                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                  {channel.channel_title || channel.query}
-                </h3>
-                
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>{channel.search_count} searches</span>
                   {channel.avg_score && (
-                    <span className={getRiskColor(channel.avg_score)}>
-                      Risk: {channel.avg_score.toFixed(1)}/4
+                    <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)}`}>
+                      {channel.avg_score.toFixed(1)}/4
                     </span>
                   )}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center justify-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={prevMostSearched}
-              disabled={currentMostSearched === 0}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-            <span className="text-sm text-gray-600">
-              Showing {currentMostSearched + 1}-{Math.min(currentMostSearched + 3, data.mostSearched.length)} of {data.mostSearched.length}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={nextMostSearched}
-              disabled={currentMostSearched >= data.mostSearched.length - 3}
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-        </Card>
-
-        {/* Highest Risk Channels */}
-        <Card className="p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-              <h2 className="text-xl font-bold text-gray-900">Highest Risk Channels</h2>
-            </div>
-            
-            {/* Mobile Navigation */}
-            <div className="flex items-center gap-2 sm:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={prevHighestRisk}
-                disabled={currentHighestRisk === 0}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-gray-600">
-                {Math.min(currentHighestRisk + 3, data.highestRisk.length)} of {data.highestRisk.length}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={nextHighestRisk}
-                disabled={currentHighestRisk >= data.highestRisk.length - 3}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.highestRisk
-              .slice(currentHighestRisk, currentHighestRisk + 3)
-              .map((channel, index) => (
-              <div key={`${channel.query}-${index}`} className="p-4 bg-red-50 rounded-lg border border-red-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-sm font-bold text-red-700">
-                    {currentHighestRisk + index + 1}
-                  </div>
-                  {channel.channel_thumbnail ? (
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={channel.channel_thumbnail} alt={channel.channel_title} />
-                      <AvatarFallback>{channel.channel_title?.[0] || channel.query[0]}</AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500 text-sm font-medium">
-                        {channel.channel_title?.[0] || channel.query[0]}
-                      </span>
-                    </div>
-                  )}
-                  {channel.age_band && (
-                    <Badge className={`text-xs ${getAgeBadgeColor(channel.age_band)}`}>
-                      {channel.age_band}
-                    </Badge>
-                  )}
-                </div>
-                
-                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                  {channel.channel_title || channel.query}
-                </h3>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">{channel.search_count} searches</span>
-                  <span className={`font-medium ${getRiskColor(channel.avg_score)}`}>
-                    Risk: {channel.avg_score?.toFixed(1)}/4
+                  <span className="text-sm text-gray-600 font-medium">
+                    {channel.search_count} searches
                   </span>
                 </div>
               </div>
             ))}
           </div>
+        </Card>
+
+        {/* Highest Risk Channels */}
+        <Card className="p-6 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <AlertTriangle className="h-6 w-6 text-red-600" />
+            <h2 className="text-xl font-bold text-gray-900">Highest Risk Channels</h2>
+          </div>
           
-          {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center justify-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={prevHighestRisk}
-              disabled={currentHighestRisk === 0}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-            <span className="text-sm text-gray-600">
-              Showing {currentHighestRisk + 1}-{Math.min(currentHighestRisk + 3, data.highestRisk.length)} of {data.highestRisk.length}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={nextHighestRisk}
-              disabled={currentHighestRisk >= data.highestRisk.length - 3}
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
+          <div className="space-y-3">
+            {data.highestRisk.slice(0, 10).map((channel, index) => (
+              <div key={`${channel.query}-${index}`} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 transition-colors">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-sm font-bold text-red-700 flex-shrink-0">
+                    {index + 1}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    {channel.channel_url ? (
+                      <a
+                        href={channel.channel_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-gray-900 hover:text-red-600 hover:underline line-clamp-1"
+                      >
+                        {channel.channel_title || channel.query}
+                      </a>
+                    ) : (
+                      <span className="font-semibold text-gray-900 line-clamp-1">
+                        {channel.channel_title || channel.query}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  {channel.age_band && (
+                    <Badge className={`text-xs ${getAgeBadgeColor(channel.age_band)}`}>
+                      {channel.age_band}
+                    </Badge>
+                  )}
+                  <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)}`}>
+                    {channel.avg_score?.toFixed(1)}/4
+                  </span>
+                  <span className="text-sm text-gray-600 font-medium">
+                    {channel.search_count} searches
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
 
