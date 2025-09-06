@@ -33,6 +33,8 @@ if (supabaseUrl && supabaseServiceKey) {
 export interface AnalyticsData {
   query: string;
   query_type: 'channel_url' | 'video_url' | 'handle' | 'search_term';
+  channel_name?: string;
+  channel_url?: string;
   age_band?: string;
   video_count: number;
   transcript_coverage_percent: number;
@@ -163,6 +165,7 @@ export async function saveAnalytics(data: AnalyticsData): Promise<void> {
 export async function trackSuccessfulAnalysis(
   query: string,
   results: any,
+  channelInfo?: { title?: string; handle?: string },
   userAgent?: string,
   device?: string,
   tokenUsage?: {
@@ -175,9 +178,18 @@ export async function trackSuccessfulAnalysis(
   const engagementStats = calculateEngagementStats(results.videos || []);
   const sessionId = getCurrentSessionId();
   
+  // Build channel URL from handle if available
+  let channelUrl = undefined;
+  if (channelInfo?.handle) {
+    const cleanHandle = channelInfo.handle.startsWith('@') ? channelInfo.handle : `@${channelInfo.handle}`;
+    channelUrl = `https://www.youtube.com/${cleanHandle}`;
+  }
+  
   const analyticsData: AnalyticsData = {
     query,
     query_type: getQueryType(query),
+    channel_name: channelInfo?.title,
+    channel_url: channelUrl,
     age_band: results.aggregate?.ageBand,
     video_count: results.videos?.length || 0,
     transcript_coverage_percent: results.transcriptCoverage?.percentage || 0,
@@ -200,6 +212,7 @@ export async function trackSuccessfulAnalysis(
 export async function trackFailedAnalysis(
   query: string,
   errorType: string,
+  channelInfo?: { title?: string; handle?: string },
   userAgent?: string,
   device?: string,
   tokenUsage?: {
@@ -211,9 +224,18 @@ export async function trackFailedAnalysis(
 ) {
   const sessionId = getCurrentSessionId();
   
+  // Build channel URL from handle if available
+  let channelUrl = undefined;
+  if (channelInfo?.handle) {
+    const cleanHandle = channelInfo.handle.startsWith('@') ? channelInfo.handle : `@${channelInfo.handle}`;
+    channelUrl = `https://www.youtube.com/${cleanHandle}`;
+  }
+  
   const analyticsData: AnalyticsData = {
     query,
     query_type: getQueryType(query),
+    channel_name: channelInfo?.title,
+    channel_url: channelUrl,
     video_count: 0,
     transcript_coverage_percent: 0,
     warnings_count: 0,

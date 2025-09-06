@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     // Get all successful searches
     const { data: allSearches, error: searchError } = await supabase
       .from('search_analytics')
-      .select('*')
+      .select('query, channel_name, channel_url, age_band, created_at')
       .eq('analysis_success', true)
       .gte('created_at', range === '30days' ? 
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() : 
@@ -107,9 +107,10 @@ export async function GET(req: NextRequest) {
 
         return {
           query,
-          channel_title: null, // We don't store this in search_analytics
-          channel_handle: null,
-          channel_thumbnail: null,
+          channel_title: latestSearch.channel_name || null,
+          channel_handle: latestSearch.channel_url ? 
+            latestSearch.channel_url.split('/').pop() : null,
+          channel_thumbnail: null, // We don't store thumbnails
           search_count: searches.length,
           avg_score: avgScore,
           age_band: latestSearch.age_band,
@@ -137,9 +138,10 @@ export async function GET(req: NextRequest) {
 
         return {
           query,
-          channel_title: null,
-          channel_handle: null,
-          channel_thumbnail: null,
+          channel_title: latestSearch.channel_name || null,
+          channel_handle: latestSearch.channel_url ? 
+            latestSearch.channel_url.split('/').pop() : null,
+          channel_thumbnail: null, // We don't store thumbnails
           search_count: searches.length,
           avg_score: avgScore,
           age_band: latestSearch.age_band,

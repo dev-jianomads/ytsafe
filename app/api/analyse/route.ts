@@ -116,12 +116,12 @@ export async function POST(req: NextRequest) {
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
     
     if (!q || typeof q !== 'string') {
-      await trackFailedAnalysis(parsedQuery || 'invalid_query', 'MISSING_QUERY', userAgent, device);
+      await trackFailedAnalysis(parsedQuery || 'invalid_query', 'MISSING_QUERY', undefined, userAgent, device);
       return NextResponse.json({ error: "MISSING_QUERY" }, { status: 400 });
     }
     
     if (!YT || !OPENAI_KEY) {
-      await trackFailedAnalysis(parsedQuery, 'SERVER_MISCONFIG', userAgent, device);
+      await trackFailedAnalysis(parsedQuery, 'SERVER_MISCONFIG', undefined, userAgent, device);
       return NextResponse.json({ error: "SERVER_MISCONFIG" }, { status: 500 });
     }
 
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       // Resolve channel ID
       const channelId = await resolveChannelId(q, YT);
       if (!channelId) {
-        await trackFailedAnalysis(parsedQuery, 'CHANNEL_NOT_FOUND', userAgent, device);
+        await trackFailedAnalysis(parsedQuery, 'CHANNEL_NOT_FOUND', undefined, userAgent, device);
         return NextResponse.json({ error: "CHANNEL_NOT_FOUND" }, { status: 404 });
       }
 
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
       ]);
 
       if (videoIds.length === 0) {
-        await trackFailedAnalysis(parsedQuery, 'NO_VIDEOS_FOUND', userAgent, device);
+        await trackFailedAnalysis(parsedQuery, 'NO_VIDEOS_FOUND', channelInfo, userAgent, device);
         return NextResponse.json({ error: "NO_VIDEOS_FOUND" }, { status: 404 });
       }
 
@@ -755,6 +755,7 @@ export async function POST(req: NextRequest) {
       await trackSuccessfulAnalysis(
         parsedQuery, 
         analysisResult, 
+        channelInfo,
         userAgent,
         device,
         {
@@ -786,11 +787,11 @@ export async function POST(req: NextRequest) {
     });
     
     if (error.name === 'AbortError') {
-      await trackFailedAnalysis(parsedQuery, 'TIMEOUT', userAgent, device);
+      await trackFailedAnalysis(parsedQuery, 'TIMEOUT', undefined, userAgent, device);
       return NextResponse.json({ error: "TIMEOUT" }, { status: 408 });
     }
     
-    await trackFailedAnalysis(parsedQuery, 'ANALYSIS_FAILED', userAgent, device);
+    await trackFailedAnalysis(parsedQuery, 'ANALYSIS_FAILED', undefined, userAgent, device);
     return NextResponse.json({ 
       error: "ANALYSIS_FAILED", 
       detail: error?.message ?? String(error) 
