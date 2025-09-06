@@ -361,10 +361,9 @@ Always preview content yourself and consider your child's maturity level.`;
             <h2 className="text-xl font-bold text-gray-900">Highest Risk Channels</h2>
           </div>
           
-          {/* Header for mobile */}
-          <div className="flex justify-between items-center text-sm text-gray-600 font-medium mb-3 px-3 sm:hidden">
+          {/* Header for mobile - no searches column for highest risk */}
+          <div className="text-sm text-gray-600 font-medium mb-3 px-3 sm:hidden">
             <span>Channel</span>
-            <span>Searches</span>
           </div>
           
           <div className="space-y-3">
@@ -402,9 +401,8 @@ Always preview content yourself and consider your child's maturity level.`;
                   <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)}`}>
                     {channel.avg_score?.toFixed(1)}/4
                   </span>
-                  <span className="text-sm text-gray-600 font-medium">
-                    <span className="sm:hidden">{channel.search_count}</span>
-                    <span className="hidden sm:inline">{channel.search_count} searches</span>
+                  <span className="text-sm text-gray-600 font-medium hidden sm:inline">
+                    {channel.search_count} searches
                   </span>
                 </div>
               </div>
