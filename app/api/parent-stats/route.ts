@@ -155,6 +155,9 @@ export async function GET(req: NextRequest) {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )[0];
         
+        // Process legacy record data
+        const processed = processLegacyRecord(latestSearch);
+        
         // Calculate average risk score from age band
         const avgScore = searches.reduce((sum, search) => {
           const score = search.age_band === 'E' ? 0.5 :
@@ -166,9 +169,9 @@ export async function GET(req: NextRequest) {
 
         return {
           query,
-          channel_title: latestSearch.channel_name || null,
-          channel_handle: latestSearch.channel_url ? 
-            latestSearch.channel_url.split('/').pop() : null,
+          channel_title: processed.displayName,
+          channel_url: processed.channelUrl,
+          channel_handle: processed.channelHandle,
           channel_thumbnail: null, // We don't store thumbnails
           search_count: searches.length,
           avg_score: avgScore,
