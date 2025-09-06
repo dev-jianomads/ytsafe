@@ -399,7 +399,7 @@ Always preview content yourself and consider your child's maturity level.`;
                       {channel.age_band}
                     </Badge>
                   )}
-                  <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)} hidden sm:inline`}>
+                  <span className={`text-sm font-medium ${getRiskColor(channel.avg_score)}`}>
                     {channel.avg_score?.toFixed(1)}/4
                   </span>
                   <span className="text-sm text-gray-600 font-medium">
