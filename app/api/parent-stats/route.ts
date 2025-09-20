@@ -35,27 +35,40 @@ export async function GET(req: NextRequest) {
     
     console.log('📊 Fetching parent stats for range:', range);
     
-    // Calculate date filter
-    let dateFilter = {};
-    if (range === '30days') {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      dateFilter = { created_at: { gte: thirtyDaysAgo.toISOString() } };
-    }
+    // Calculate date filter for the query
+    const dateFilter = range === '30days' ? 
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() : 
+      '1970-01-01';
 
-    // Get all successful searches
-    const { data: allSearches, error: searchError } = await supabase
+    // Get all successful searches with proper error handling
+    console.log('🔍 Querying search_analytics table...');
+    
+    const query = supabase
       .from('search_analytics')
       .select('query, channel_name, channel_url, age_band, created_at')
       .eq('analysis_success', true)
-      .gte('created_at', range === '30days' ? 
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() : 
-        '1970-01-01'
-      );
+      .gte('created_at', dateFilter);
+    
+    const { data: allSearches, error: searchError } = await query;
 
     if (searchError) {
-      console.error('❌ Search query error:', searchError);
-      throw new Error(`Database query failed: ${searchError.message}`);
+      console.error('❌ Search query error:', {
+        message: searchError.message,
+        details: searchError.details,
+        hint: searchError.hint,
+        code: searchError.code
+      });
+      
+      // Return empty data instead of throwing error
+      return NextResponse.json({
+        error: `Database query failed: ${searchError.message}`,
+        mostSearched: [],
+        highestRisk: [],
+        totalSearches: 0,
+        totalChannels: 0,
+        avgRiskScore: 0,
+        ratingDistribution: { 'E': 0, 'E10+': 0, 'T': 0, '16+': 0 }
+      }, { status: 500 });
     }
 
     console.log('📊 Raw search data:', {
