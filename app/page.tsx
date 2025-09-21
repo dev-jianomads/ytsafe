@@ -32,6 +32,7 @@ export default function Home() {
   const [feedbackData, setFeedbackData] = useState<{ sessionId: string; userAgentHash?: string }>({ sessionId: '' });
 
   const handleAnalyse = async (searchQuery: string) => {
+    console.log('🔍 Starting analysis for:', searchQuery);
     setIsLoading(true);
     setLoadingMessage('Fetching video information...');
     setError(null);
@@ -85,6 +86,11 @@ export default function Home() {
       setIsLoading(false);
       setLoadingMessage('');
     }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    console.log('📷 Image uploaded:', file.name, file.type, file.size);
+    // TODO: Implement OCR and channel detection
   };
 
   const handleSelectFromHistory = (historicalQuery: string) => {
@@ -172,6 +178,7 @@ export default function Home() {
             initialQuery={query}
             onToggleHistory={() => setIsHistoryOpen(true)}
            shouldClearAfterAnalysis={shouldClearSearch}
+            onImageUpload={handleImageUpload}
           />
 
           {/* Parent Stats Link */}
