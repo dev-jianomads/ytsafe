@@ -4,28 +4,45 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+console.log('🔧 Parent Stats API Environment Check:', {
+  hasUrl: !!supabaseUrl,
+  hasServiceKey: !!supabaseServiceKey,
+  urlPreview: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'missing',
+  keyPreview: supabaseServiceKey ? `${supabaseServiceKey.substring(0, 10)}...` : 'missing'
+});
+
 let supabase: any = null;
 
 if (supabaseUrl && supabaseServiceKey) {
-  supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
+  try {
+    supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    console.log('✅ Supabase client created successfully');
+  } catch (error) {
+    console.error('❌ Failed to create Supabase client:', error);
+  }
+} else {
+  console.warn('⚠️ Supabase not configured - missing environment variables');
 }
 
 export async function GET(req: NextRequest) {
+  console.log('📊 Parent Stats API called');
+  
+  // If Supabase is not configured, return mock data
   if (!supabase) {
-    console.warn('Supabase not configured, returning mock data');
+    console.warn('🔧 Supabase not configured, returning empty data');
     return NextResponse.json({ 
-      error: 'Database not configured',
       mostSearched: [],
       highestRisk: [],
       totalSearches: 0,
       totalChannels: 0,
       avgRiskScore: 0,
-      ratingDistribution: {}
+      ratingDistribution: { 'E': 0, 'E10+': 0, 'T': 0, '16+': 0 },
+      error: 'Database not configured - check environment variables'
     });
   }
 
@@ -35,29 +52,49 @@ export async function GET(req: NextRequest) {
     
     console.log('📊 Fetching parent stats for range:', range);
     
-    // Calculate date filter for the query
-    const dateFilter = range === '30days' ? 
-      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() : 
-      '1970-01-01';
-
-    // Get all successful searches with proper error handling
-    console.log('🔍 Querying search_analytics table...');
+    // Test basic connection first
+    console.log('🔍 Testing Supabase connection...');
+    const { data: testData, error: testError } = await supabase
+      .from('search_analytics')
+      .select('count(*)')
+      .limit(1);
     
+    if (testError) {
+      console.error('❌ Supabase connection test failed:', testError);
+      return NextResponse.json({
+        error: `Database connection failed: ${testError.message}`,
+        mostSearched: [],
+        highestRisk: [],
+        totalSearches: 0,
+        totalChannels: 0,
+        avgRiskScore: 0,
+        ratingDistribution: { 'E': 0, 'E10+': 0, 'T': 0, '16+': 0 }
+      }, { status: 500 });
+    }
+    
+    console.log('✅ Supabase connection test passed');
+    
+    // Calculate date filter
+    let dateFilter = '1970-01-01';
+    if (range === '30days') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      dateFilter = thirtyDaysAgo.toISOString();
+    }
+    
+    console.log('📅 Using date filter:', dateFilter);
+    
+    // Get all successful searches
+    console.log('🔍 Querying search_analytics table...');
     const { data: allSearches, error: searchError } = await supabase
       .from('search_analytics')
       .select('query, channel_name, channel_url, age_band, created_at')
       .eq('analysis_success', true)
-      .gte('created_at', dateFilter);
+      .gte('created_at', dateFilter)
+      .order('created_at', { ascending: false });
 
     if (searchError) {
-      console.error('❌ Search query error:', {
-        message: searchError.message,
-        details: searchError.details,
-        hint: searchError.hint,
-        code: searchError.code
-      });
-      
-      // Return empty data instead of throwing error
+      console.error('❌ Search query error:', searchError);
       return NextResponse.json({
         error: `Database query failed: ${searchError.message}`,
         mostSearched: [],
@@ -69,69 +106,7 @@ export async function GET(req: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('📊 Raw search data:', {
-      totalRecords: allSearches?.length || 0,
-      sampleRecord: allSearches?.[0] || null
-    });
-
-    // Helper function to clean up display names and extract URLs from legacy data
-    const processLegacyRecord = (record: any) => {
-      let displayName = record.channel_name || record.query;
-      let channelUrl = record.channel_url;
-      let channelHandle = null;
-      
-      // If no channel_url but query looks like a URL, use it
-      if (!channelUrl && record.query) {
-        if (record.query.includes('youtube.com/')) {
-          channelUrl = record.query;
-        } else if (record.query.startsWith('@')) {
-          // Convert @handle to proper YouTube URL
-          const cleanHandle = record.query.replace(/^@+/, '');
-          channelUrl = `https://www.youtube.com/@${cleanHandle}`;
-          channelHandle = `@${cleanHandle}`;
-        }
-      }
-      
-      // Clean up display name
-      if (!record.channel_name) {
-        if (record.query.startsWith('@')) {
-          // Convert "@gameranxTV" to "GameranxTV"
-          displayName = record.query.replace(/^@+/, '');
-        } else if (record.query.includes('youtube.com/watch')) {
-          // For video URLs, try to extract a meaningful name or use "Video Link"
-          displayName = 'Video Link';
-        } else if (record.query.includes('youtube.com/')) {
-          // For other YouTube URLs, try to extract channel info
-          const urlParts = record.query.split('/');
-          const lastPart = urlParts[urlParts.length - 1];
-          if (lastPart && lastPart !== 'youtube.com') {
-            displayName = lastPart.replace(/^@+/, '');
-          } else {
-            displayName = 'YouTube Channel';
-          }
-        }
-        // Otherwise keep the original query as display name
-      }
-      
-      // Extract handle from channel_url if we have one but no handle yet
-      if (channelUrl && !channelHandle) {
-        if (channelUrl.includes('youtube.com/@')) {
-          const handleMatch = channelUrl.match(/youtube\.com\/@([^/?]+)/);
-          if (handleMatch) {
-            channelHandle = `@${handleMatch[1]}`;
-          }
-        } else if (channelUrl.includes('youtube.com/channel/')) {
-          // For channel ID URLs, we can't extract a nice handle
-          channelHandle = null;
-        }
-      }
-      
-      return {
-        displayName,
-        channelUrl,
-        channelHandle
-      };
-    };
+    console.log('📊 Query successful, records found:', allSearches?.length || 0);
 
     if (!allSearches || allSearches.length === 0) {
       console.warn('⚠️ No search data found');
@@ -145,7 +120,36 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Group by query to get search counts
+    // Process the data
+    const processLegacyRecord = (record: any) => {
+      let displayName = record.channel_name || record.query;
+      let channelUrl = record.channel_url;
+      
+      // Clean up display name and generate URL if missing
+      if (!record.channel_name) {
+        if (record.query.startsWith('@')) {
+          displayName = record.query.replace(/^@+/, '');
+          if (!channelUrl) {
+            channelUrl = `https://www.youtube.com/${record.query}`;
+          }
+        } else if (record.query.includes('youtube.com/watch')) {
+          displayName = 'Video Link';
+        } else if (record.query.includes('youtube.com/')) {
+          channelUrl = record.query;
+          const urlParts = record.query.split('/');
+          const lastPart = urlParts[urlParts.length - 1];
+          if (lastPart && lastPart !== 'youtube.com') {
+            displayName = lastPart.replace(/^@+/, '');
+          } else {
+            displayName = 'YouTube Channel';
+          }
+        }
+      }
+      
+      return { displayName, channelUrl };
+    };
+
+    // Group by query
     const queryGroups: Record<string, any[]> = {};
     allSearches.forEach((search: any) => {
       if (!queryGroups[search.query]) {
@@ -154,22 +158,14 @@ export async function GET(req: NextRequest) {
       queryGroups[search.query].push(search);
     });
 
-    console.log('📊 Query groups:', {
-      totalQueries: Object.keys(queryGroups).length,
-      sampleQueries: Object.keys(queryGroups).slice(0, 3)
-    });
+    console.log('📊 Grouped into', Object.keys(queryGroups).length, 'unique queries');
 
     // Calculate most searched channels
     const mostSearched = Object.entries(queryGroups)
       .map(([query, searches]) => {
-        const latestSearch = searches.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0];
-        
-        // Process legacy record data
+        const latestSearch = searches[0]; // Already sorted by created_at desc
         const processed = processLegacyRecord(latestSearch);
         
-        // Calculate average risk score from age band
         const avgScore = searches.reduce((sum, search) => {
           const score = search.age_band === 'E' ? 0.5 :
                        search.age_band === 'E10+' ? 1.5 :
@@ -182,8 +178,6 @@ export async function GET(req: NextRequest) {
           query,
           channel_title: processed.displayName,
           channel_url: processed.channelUrl,
-          channel_handle: processed.channelHandle,
-          channel_thumbnail: null, // We don't store thumbnails
           search_count: searches.length,
           avg_score: avgScore,
           age_band: latestSearch.age_band,
@@ -193,17 +187,12 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.search_count - a.search_count)
       .slice(0, 20);
 
-    // Calculate highest risk channels (only those with scores > 0)
+    // Calculate highest risk channels
     const highestRisk = Object.entries(queryGroups)
       .map(([query, searches]) => {
-        const latestSearch = searches.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0];
-        
-        // Process legacy record data
+        const latestSearch = searches[0];
         const processed = processLegacyRecord(latestSearch);
         
-        // Calculate average risk score from age band
         const avgScore = searches.reduce((sum, search) => {
           const score = search.age_band === 'E' ? 0.5 :
                        search.age_band === 'E10+' ? 1.5 :
@@ -216,8 +205,6 @@ export async function GET(req: NextRequest) {
           query,
           channel_title: processed.displayName,
           channel_url: processed.channelUrl,
-          channel_handle: processed.channelHandle,
-          channel_thumbnail: null, // We don't store thumbnails
           search_count: searches.length,
           avg_score: avgScore,
           age_band: latestSearch.age_band,
@@ -225,14 +212,13 @@ export async function GET(req: NextRequest) {
         };
       })
       .filter(channel => channel.avg_score > 0)
-      .sort((a, b) => b.avg_score - a.avg_score || b.search_count - a.search_count) // Sort by risk score first, then by search count
+      .sort((a, b) => b.avg_score - a.avg_score || b.search_count - a.search_count)
       .slice(0, 20);
 
     // Calculate aggregate stats
     const totalSearches = allSearches.length;
     const uniqueChannels = Object.keys(queryGroups).length;
     
-    // Calculate average risk score and rating distribution
     let totalRiskScore = 0;
     let riskScoreCount = 0;
     const ratingDistribution: Record<string, number> = { 'E': 0, 'E10+': 0, 'T': 0, '16+': 0 };
@@ -240,10 +226,7 @@ export async function GET(req: NextRequest) {
     allSearches.forEach((record: any) => {
       if (record.age_band) {
         ratingDistribution[record.age_band] = (ratingDistribution[record.age_band] || 0) + 1;
-      }
-      
-      // Calculate average risk score (estimate from age band)
-      if (record.age_band) {
+        
         let estimatedScore = 0;
         switch (record.age_band) {
           case 'E': estimatedScore = 0.5; break;
@@ -258,13 +241,12 @@ export async function GET(req: NextRequest) {
 
     const avgRiskScore = riskScoreCount > 0 ? totalRiskScore / riskScoreCount : 0;
 
-    console.log('📊 Final stats:', {
+    console.log('✅ Successfully processed stats:', {
       totalSearches,
       uniqueChannels,
-      avgRiskScore,
+      avgRiskScore: avgRiskScore.toFixed(2),
       mostSearchedCount: mostSearched.length,
-      highestRiskCount: highestRisk.length,
-      ratingDistribution
+      highestRiskCount: highestRisk.length
     });
 
     return NextResponse.json({
