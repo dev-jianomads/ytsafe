@@ -54,10 +54,9 @@ export async function GET(req: NextRequest) {
     
     // Test basic connection first
     console.log('🔍 Testing Supabase connection...');
-    const { data: testData, error: testError } = await supabase
+    const { count: testCount, error: testError } = await supabase
       .from('search_analytics')
-      .select('count(*)')
-      .limit(1);
+      .select('*', { count: 'exact', head: true });
     
     if (testError) {
       console.error('❌ Supabase connection test failed:', testError);
@@ -72,7 +71,7 @@ export async function GET(req: NextRequest) {
       }, { status: 500 });
     }
     
-    console.log('✅ Supabase connection test passed');
+    console.log('✅ Supabase connection test passed, total records:', testCount);
     
     // Calculate date filter
     let dateFilter = '1970-01-01';
