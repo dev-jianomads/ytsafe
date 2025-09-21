@@ -43,13 +43,11 @@ export async function GET(req: NextRequest) {
     // Get all successful searches with proper error handling
     console.log('🔍 Querying search_analytics table...');
     
-    const query = supabase
+    const { data: allSearches, error: searchError } = await supabase
       .from('search_analytics')
       .select('query, channel_name, channel_url, age_band, created_at')
       .eq('analysis_success', true)
       .gte('created_at', dateFilter);
-    
-    const { data: allSearches, error: searchError } = await query;
 
     if (searchError) {
       console.error('❌ Search query error:', {
@@ -202,6 +200,9 @@ export async function GET(req: NextRequest) {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )[0];
         
+        // Process legacy record data
+        const processed = processLegacyRecord(latestSearch);
+        
         // Calculate average risk score from age band
         const avgScore = searches.reduce((sum, search) => {
           const score = search.age_band === 'E' ? 0.5 :
@@ -213,9 +214,9 @@ export async function GET(req: NextRequest) {
 
         return {
           query,
-          channel_title: latestSearch.channel_name || null,
-          channel_handle: latestSearch.channel_url ? 
-            latestSearch.channel_url.split('/').pop() : null,
+          channel_title: processed.displayName,
+          channel_url: processed.channelUrl,
+          channel_handle: processed.channelHandle,
           channel_thumbnail: null, // We don't store thumbnails
           search_count: searches.length,
           avg_score: avgScore,
